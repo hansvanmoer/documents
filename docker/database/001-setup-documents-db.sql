@@ -20,5 +20,6 @@ CREATE TABLE document (
     id BIGSERIAL PRIMARY KEY,
     uuid CHARACTER(36) UNIQUE NOT NULL,
     created TIMESTAMP NOT NULL,
-    content_id BIGINT NOT NULL REFERENCES content (id)
+    content_id BIGINT NOT NULL REFERENCES content (id),
+    content_index_status VARCHAR(32) NOT NULL
                       );

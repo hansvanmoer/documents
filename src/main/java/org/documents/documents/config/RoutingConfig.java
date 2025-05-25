@@ -3,7 +3,7 @@ package org.documents.documents.config;
 import lombok.AllArgsConstructor;
 import org.documents.documents.handler.ContentHandler;
 import org.documents.documents.handler.DocumentHandler;
-import org.documents.documents.model.rest.ApiConstants;
+import org.documents.documents.model.api.ApiConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;

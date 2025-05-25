@@ -2,7 +2,7 @@ package org.documents.documents.helper.impl;
 
 import lombok.AllArgsConstructor;
 import org.documents.documents.config.settings.FileSettings;
-import org.documents.documents.entity.ContentEntity;
+import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.helper.ContentHelper;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -26,7 +26,7 @@ public class ContentHelperImpl implements ContentHelper {
     @Override
     public Mono<String> readContentAsString(ContentEntity entity) {
         if(entity.getMimeType().equals(MediaType.TEXT_PLAIN_VALUE)) {
-            final Charset charset = Optional.of(MediaType.parseMediaType(entity.getMimeType()).getCharset())
+            final Charset charset = Optional.ofNullable(MediaType.parseMediaType(entity.getMimeType()).getCharset())
                     .orElse(StandardCharsets.UTF_8);
             return DataBufferUtils.join(readContent(entity))
                     .map(DataBuffer::readableByteBuffers)

@@ -1,6 +1,6 @@
 package org.documents.documents.helper;
 
-import org.documents.documents.entity.ContentEntity;
+import org.documents.documents.db.entity.ContentEntity;
 import reactor.core.publisher.Mono;
 
 public interface ContentHelper {

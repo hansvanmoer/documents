@@ -3,7 +3,7 @@ package org.documents.documents.helper.impl;
 import lombok.AllArgsConstructor;
 import org.documents.documents.config.settings.MessageSettings;
 import org.documents.documents.helper.RequestTransformHelper;
-import org.documents.documents.model.message.RequestTransformMessage;
+import org.documents.documents.message.payload.RequestTransformMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

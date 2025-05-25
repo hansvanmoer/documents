@@ -1,6 +1,7 @@
-package org.documents.documents.entity;
+package org.documents.documents.db.entity;
 
 import lombok.Data;
+import org.documents.documents.model.api.ContentIndexStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -16,5 +17,7 @@ public class DocumentEntity {
     private LocalDateTime created;
     @Column("content_id")
     private Long contentId;
+    @Column("content_index_status")
+    private ContentIndexStatus contentIndexStatus;
     private String title;
 }

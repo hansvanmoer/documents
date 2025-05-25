@@ -1,12 +1,16 @@
 package org.documents.documents.helper.impl;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.entity.ContentEntity;
-import org.documents.documents.entity.DocumentEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.documents.documents.db.entity.ContentEntity;
+import org.documents.documents.db.entity.DocumentEntity;
+import org.documents.documents.db.repository.ContentRepository;
+import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.helper.ContentHelper;
 import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.DocumentMapper;
+import org.documents.documents.model.api.ContentIndexStatus;
 import org.documents.documents.search.document.DocumentSearchDocument;
 import org.documents.documents.search.repository.DocumentSearchRepository;
 import org.springframework.data.elasticsearch.core.RefreshPolicy;
@@ -16,26 +20,50 @@ import reactor.core.publisher.Mono;
 
 @AllArgsConstructor
 @Component
+@Slf4j
 public class IndexHelperImpl implements IndexHelper {
 
     private final ContentHelper contentHelper;
+    private final ContentRepository contentRepository;
     private final DocumentMapper documentMapper;
     private final DocumentSearchRepository documentSearchRepository;
     private final RenditionHelper renditionHelper;
+    private final DocumentRepository documentRepository;
 
     @Override
-    public Mono<Void> indexDocument(DocumentEntity documentEntity, ContentEntity contentEntity) {
-        final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity);
+    public Mono<DocumentEntity> indexDocument(DocumentEntity documentEntity) {
+        final Mono<ContentEntity> contentProducer = contentRepository.findById(documentEntity.getContentId())
+                        .flatMap(contentEntity -> renditionHelper.getRendition(contentEntity, MediaType.TEXT_PLAIN));
+        return contentProducer
+                .flatMap(content -> indexWithContent(documentEntity, content))
+                .switchIfEmpty(Mono.just(documentEntity).flatMap(this::indexMetadata));
+    }
 
+    @Override
+    public Mono<DocumentEntity> indexDocumentOrScheduleIndexation(DocumentEntity documentEntity, ContentEntity contentEntity) {
         final Mono<ContentEntity> contentProducer = renditionHelper.getOrRequestRendition(contentEntity, MediaType.TEXT_PLAIN);
         return contentProducer
-                .flatMap(rendition -> contentHelper.readContentAsString(rendition))
-                .switchIfEmpty(Mono.just(new String()))
-                .map(text -> {
+                .flatMap(content -> indexWithContent(documentEntity, content))
+                .switchIfEmpty(Mono.just(documentEntity).flatMap(this::indexMetadata));
+    }
+
+    private Mono<DocumentEntity> indexMetadata(DocumentEntity documentEntity) {
+        final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity);
+        return documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE)
+                .thenReturn(documentEntity);
+    }
+
+    private Mono<DocumentEntity> indexWithContent(DocumentEntity documentEntity, ContentEntity contentEntity) {
+        return contentHelper.readContentAsString(contentEntity)
+                .flatMap(text -> {
+                    final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity);
                     document.setContent(text);
-                    return document;
+                    return documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE);
                 })
-                .flatMap(d -> documentSearchRepository.save(d, RefreshPolicy.IMMEDIATE))
-                .then();
+                .thenReturn(documentEntity)
+                .flatMap(documentEntity1 -> {
+                    documentEntity.setContentIndexStatus(ContentIndexStatus.INDEXED);
+                    return documentRepository.save(documentEntity);
+                });
     }
 }

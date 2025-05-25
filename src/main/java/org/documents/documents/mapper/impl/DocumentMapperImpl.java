@@ -1,13 +1,12 @@
 package org.documents.documents.mapper.impl;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.entity.ContentEntity;
-import org.documents.documents.entity.DocumentEntity;
+import org.documents.documents.db.entity.ContentEntity;
+import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.mapper.DocumentMapper;
-import org.documents.documents.model.rest.Document;
+import org.documents.documents.model.api.Document;
 import org.documents.documents.search.document.DocumentSearchDocument;
-import org.springframework.data.elasticsearch.core.document.SearchDocument;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -24,6 +23,7 @@ public class DocumentMapperImpl implements DocumentMapper {
                 UUID.fromString(documentEntity.getUuid()),
                 temporalHelper.fromDatabaseTime(documentEntity.getCreated()),
                 contentEntity.getMimeType(),
+                documentEntity.getContentIndexStatus(),
                 documentEntity.getTitle()
         );
     }

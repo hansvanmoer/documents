@@ -1,7 +1,7 @@
 package org.documents.documents.handler;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.model.rest.Content;
+import org.documents.documents.model.api.Content;
 import org.documents.documents.service.ContentService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;

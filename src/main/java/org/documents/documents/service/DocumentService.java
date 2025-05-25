@@ -1,6 +1,6 @@
 package org.documents.documents.service;
 
-import org.documents.documents.model.rest.Document;
+import org.documents.documents.model.api.Document;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;

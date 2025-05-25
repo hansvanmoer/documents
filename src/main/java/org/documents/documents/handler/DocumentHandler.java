@@ -1,8 +1,7 @@
 package org.documents.documents.handler;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.model.rest.CreateDocumentRequest;
-import org.documents.documents.model.rest.Document;
+import org.documents.documents.model.api.CreateDocumentRequest;
 import org.documents.documents.service.DocumentService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

@@ -4,13 +4,10 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.file.Path;
-
 @Configuration
-@ConfigurationProperties(prefix = "documents.transform")
+@ConfigurationProperties(prefix = "documents.search")
 @Data
-public class TransformSettings {
-    private Path path;
-    private String libreOfficeExecutable;
-    private long timeoutInMilliseconds;
+public class SearchSettings {
+    private long contentIndexDelayInMs;
+    private long contentIndexPeriodInMs;
 }

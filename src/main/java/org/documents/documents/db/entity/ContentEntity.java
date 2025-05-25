@@ -1,4 +1,4 @@
-package org.documents.documents.entity;
+package org.documents.documents.db.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

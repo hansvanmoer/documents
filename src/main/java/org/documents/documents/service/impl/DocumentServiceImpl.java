@@ -1,20 +1,19 @@
 package org.documents.documents.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.entity.ContentEntity;
-import org.documents.documents.entity.DocumentEntity;
+import org.documents.documents.db.entity.ContentEntity;
+import org.documents.documents.db.entity.DocumentEntity;
+import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.helper.RenditionHelper;
-import org.documents.documents.helper.RequestTransformHelper;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.helper.UuidHelper;
 import org.documents.documents.mapper.DocumentMapper;
+import org.documents.documents.model.api.ContentIndexStatus;
 import org.documents.documents.model.exception.NotFoundException;
-import org.documents.documents.model.rest.Document;
-import org.documents.documents.repository.ContentRepository;
-import org.documents.documents.repository.DocumentRepository;
-import org.documents.documents.repository.RenditionRepository;
+import org.documents.documents.model.api.Document;
+import org.documents.documents.db.repository.ContentRepository;
+import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.service.DocumentService;
-import org.documents.documents.service.RenditionService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -31,6 +30,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final ContentRepository contentRepository;
     private final DocumentMapper documentMapper;
     private final DocumentRepository documentRepository;
+    private final IndexHelper indexHelper;
     private final RenditionHelper renditionHelper;
     private final TemporalHelper temporalHelper;
     private final UuidHelper uuidHelper;
@@ -41,7 +41,7 @@ public class DocumentServiceImpl implements DocumentService {
                 .switchIfEmpty(Mono.error(new NotFoundException("content for new document not found", contentUuid)));
         return contentProducer
                 .flatMap(this::create)
-                .flatMap(this::requestIndexation)
+                .flatMap(t -> indexHelper.indexDocumentOrScheduleIndexation(t.getT1(), t.getT2()).map(d -> Tuples.of(d, t.getT2())))
                 .map(t -> documentMapper.map(t.getT1(), t.getT2()));
     }
 
@@ -52,13 +52,12 @@ public class DocumentServiceImpl implements DocumentService {
         entity.setUuid(uuid.toString());
         entity.setCreated(temporalHelper.toDatabaseTime(now));
         entity.setContentId(contentEntity.getId());
+        entity.setContentIndexStatus(isIndexSupported(contentEntity) ? ContentIndexStatus.WAITING : ContentIndexStatus.UNSUPPORTED);
         return documentRepository.save(entity)
                 .map(saved -> Tuples.of(saved, contentEntity));
     }
 
-    private Mono<Tuple2<DocumentEntity, ContentEntity>> requestIndexation(Tuple2<DocumentEntity, ContentEntity> t) {
-        return renditionHelper.getOrRequestRendition(t.getT2(), MediaType.TEXT_PLAIN)
-                .thenReturn(t)
-                .switchIfEmpty(Mono.just(t));
+    private boolean isIndexSupported(ContentEntity contentEntity) {
+        return renditionHelper.isSupported(contentEntity.getMimeType(), MediaType.TEXT_PLAIN_VALUE);
     }
 }

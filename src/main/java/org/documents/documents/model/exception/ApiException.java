@@ -1,7 +1,5 @@
 package org.documents.documents.model.exception;
 
-import org.documents.documents.model.rest.ErrorCode;
-
 public class ApiException extends RuntimeException {
     private final ErrorCode errorCode;
     private final Object[] args;

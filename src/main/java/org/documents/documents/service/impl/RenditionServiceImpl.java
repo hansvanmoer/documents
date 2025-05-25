@@ -1,10 +1,10 @@
 package org.documents.documents.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.entity.ContentEntity;
+import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.model.exception.NotFoundException;
-import org.documents.documents.repository.ContentRepository;
+import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.service.RenditionService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;

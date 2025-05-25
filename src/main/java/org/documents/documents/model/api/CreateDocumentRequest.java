@@ -1,4 +1,4 @@
-package org.documents.documents.model.rest;
+package org.documents.documents.model.api;
 
 import java.util.UUID;
 
