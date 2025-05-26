@@ -6,8 +6,11 @@ import reactor.core.publisher.Mono;
 
 public interface IndexHelper {
 
+    Mono<DocumentEntity> indexDocument(DocumentEntity document, ContentEntity content);
+
+    Mono<DocumentEntity> indexDocumentIfRenditionExists(DocumentEntity document, ContentEntity content);
+
     Mono<DocumentEntity> indexDocument(DocumentEntity document);
 
-    Mono<DocumentEntity> indexDocumentOrScheduleIndexation(DocumentEntity document, ContentEntity content);
-
+    Mono<DocumentEntity> indexDocumentIfRenditionExists(DocumentEntity document);
 }

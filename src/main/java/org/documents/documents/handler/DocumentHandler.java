@@ -25,8 +25,7 @@ public class DocumentHandler {
      */
     public Mono<ServerResponse> create(ServerRequest request) {
         return request.bodyToMono(CreateDocumentRequest.class)
-                .map(CreateDocumentRequest::contentUuid)
-                .flatMap(documentService::create)
+                .flatMap(r -> documentService.create(r.title(), r.contentUuid()))
                 .flatMap(document ->
                         ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)

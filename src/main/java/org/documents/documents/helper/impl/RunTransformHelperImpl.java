@@ -2,8 +2,10 @@ package org.documents.documents.helper.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.documents.documents.config.settings.FileSettings;
 import org.documents.documents.config.settings.TransformSettings;
+import org.documents.documents.db.repository.ContentRepository;
+import org.documents.documents.file.FileReference;
+import org.documents.documents.file.FileStoreRegistry;
 import org.documents.documents.helper.*;
 import org.documents.documents.model.transform.TransformResult;
 import org.documents.documents.transform.Transform;
@@ -21,14 +23,15 @@ import java.util.UUID;
 @Slf4j
 public class RunTransformHelperImpl implements RunTransformHelper {
 
-    private final FileSettings fileSettings;
+    private final FileStoreRegistry fileStoreRegistry;
     private final MimeTypeHelper mimeTypeHelper;
+    private final RenditionHelper renditionHelper;
     private final TransformRegistry transformRegistry;
     private final TransformSettings transformSettings;
-    private final UuidHelper uuidHelper;
+    private final ContentRepository contentRepository;
 
     @Override
-    public void runTransform(Path path, String sourceMimeType, String targetMimeType) {
+    public void runTransform(UUID contentUuid, FileReference fileReference, String sourceMimeType, String targetMimeType) {
         final Optional<Transform> foundTransform = transformRegistry.getTransform(sourceMimeType, targetMimeType);
         if(foundTransform.isPresent()) {
             final Transform transform = foundTransform.get();
@@ -38,26 +41,39 @@ public class RunTransformHelperImpl implements RunTransformHelper {
                 final Optional<String> foundTargetExtension = mimeTypeHelper.getExtension(targetMimeType);
                 if(foundTargetExtension.isPresent()) {
                     final String targetExtension = foundTargetExtension.get();
-                    final UUID uuid = uuidHelper.createUuid();
-                    final Path contentPath = fileSettings.getPath().resolve(path);
-                    final Path sourcePath = transformSettings.getPath().resolve(uuid + sourceExtension);
+                    final Path sourcePath = transformSettings.getPath().resolve(contentUuid + sourceExtension);
+                    fileStoreRegistry.copy(fileReference, sourcePath);
+                    final TransformResult result = transform.transform(sourcePath, sourceMimeType, targetMimeType, targetExtension);
+                    if(result.isSuccess()) {
+                        onSuccess(contentUuid, result.getResultPath(), targetMimeType);
+                    } else {
+                        onFailure(contentUuid, result.getMessage());
+                    }
                     try {
-                        Files.copy(contentPath, sourcePath);
-                        final TransformResult result = transform.transform(sourcePath, sourceMimeType, targetMimeType, targetExtension);
-                        if(!result.isSuccess()) {
-                            log.error(result.getMessage());
-                        }
+                        Files.deleteIfExists(sourcePath);
+                        Files.deleteIfExists(result.getResultPath());
                     } catch(IOException e) {
-                        log.error("could not copy content", e);
+                        log.error("failed to clean up after transform {}", contentUuid, e);
                     }
                 } else {
-                    log.info("no extension found for document {} and target mime type {}", path, targetMimeType);
+                    log.info("no extension found for document {} and target mime type {}", fileReference, targetMimeType);
                 }
             } else {
-                log.info("no extension found for document {} and source mime type {}", path, sourceMimeType);
+                log.info("no extension found for document {} and source mime type {}", fileReference, sourceMimeType);
             }
         } else {
-            log.info("no transform found for document {} and mime types {} -> {}", path, sourceMimeType, targetMimeType);
+            log.info("no transform found for document {} and mime types {} -> {}", fileReference, sourceMimeType, targetMimeType);
         }
+    }
+
+    private void onSuccess(UUID contentUuid, Path result, String targetMimeType) {
+        contentRepository.findByUuid(contentUuid.toString())
+                .flatMap(contentEntity -> renditionHelper.storeRendition(contentEntity, targetMimeType, result))
+                .block();
+        log.debug("Rendition successfully stored {} : {}", contentUuid, targetMimeType);
+    }
+
+    private void onFailure(UUID uuid, String message) {
+        log.error("failure of transform {}: {}", uuid, message);
     }
 }

@@ -43,6 +43,7 @@ public class DocumentMapperImpl implements DocumentMapper {
     @Override
     public DocumentSearchDocument mapToSearchDocument(DocumentEntity documentEntity, String text) {
         final DocumentSearchDocument searchDocument = new DocumentSearchDocument();
+        searchDocument.setId(documentEntity.getId());
         searchDocument.setUuid(documentEntity.getUuid());
         searchDocument.setTitle(documentEntity.getTitle());
         searchDocument.setCreated(documentEntity.getCreated());

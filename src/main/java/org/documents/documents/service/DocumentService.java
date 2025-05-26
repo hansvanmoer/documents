@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 public interface DocumentService {
-    Mono<Document> create(UUID contentUuid);
+    Mono<Document> create(String title, UUID contentUuid);
 
     Mono<Document> get(UUID uuid);
 

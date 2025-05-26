@@ -12,6 +12,7 @@ import java.nio.file.Path;
 @Getter
 @Setter
 public class FileSettings {
-    private Path path;
+    private Path contentPath;
+    private Path renditionPath;
     private int readBufferSize;
 }

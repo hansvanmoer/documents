@@ -16,5 +16,4 @@ public class ContentEntity {
     private LocalDateTime created;
     @Column("mime_type")
     private String mimeType;
-    private String path;
 }

@@ -21,7 +21,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public Flux<UUID> indexDocuments() {
         return documentRepository.findByContentIndexStatus(ContentIndexStatus.WAITING)
-                .flatMap(indexHelper::indexDocument)
+                .flatMap(indexHelper::indexDocumentIfRenditionExists)
                 .map(DocumentEntity::getUuid)
                 .map(UUID::fromString);
     }

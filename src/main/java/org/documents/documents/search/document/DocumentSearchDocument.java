@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 @Document(indexName = "document")
 public class DocumentSearchDocument {
     @Id
+    private Long id;
+
+    @Field(type = FieldType.Keyword)
     private String uuid;
 
     @Field(type = FieldType.Date)

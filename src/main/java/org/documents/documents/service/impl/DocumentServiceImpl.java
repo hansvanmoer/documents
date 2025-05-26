@@ -20,8 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -40,13 +38,10 @@ public class DocumentServiceImpl implements DocumentService {
     private final UuidHelper uuidHelper;
 
     @Override
-    public Mono<Document> create(UUID contentUuid) {
-        final Mono<ContentEntity> contentProducer = contentRepository.findByUuid(contentUuid.toString())
-                .switchIfEmpty(Mono.error(new NotFoundException("content for new document not found", contentUuid)));
-        return contentProducer
-                .flatMap(this::create)
-                .flatMap(t -> indexHelper.indexDocumentOrScheduleIndexation(t.getT1(), t.getT2()).map(d -> Tuples.of(d, t.getT2())))
-                .map(t -> documentMapper.map(t.getT1(), t.getT2()));
+    public Mono<Document> create(String title, UUID contentUuid) {
+        return contentRepository.findByUuid(contentUuid.toString())
+            .switchIfEmpty(Mono.error(new NotFoundException("content for new document not found", contentUuid)))
+            .flatMap(content -> create(title, content));
     }
 
     @Override
@@ -64,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService {
         return documentRepository.findByUuid(uuid.toString()).flatMap(documentRepository::delete);
     }
 
-    private Mono<Tuple2<DocumentEntity, ContentEntity>> create(ContentEntity contentEntity) {
+    private Mono<Document> create(String title, ContentEntity contentEntity) {
         final ZonedDateTime now = temporalHelper.now();
         final UUID uuid = uuidHelper.createUuid();
         final DocumentEntity entity = new DocumentEntity();
@@ -72,8 +67,10 @@ public class DocumentServiceImpl implements DocumentService {
         entity.setCreated(temporalHelper.toDatabaseTime(now));
         entity.setContentId(contentEntity.getId());
         entity.setContentIndexStatus(isIndexSupported(contentEntity) ? ContentIndexStatus.WAITING : ContentIndexStatus.UNSUPPORTED);
+        entity.setTitle(title);
         return documentRepository.save(entity)
-                .map(saved -> Tuples.of(saved, contentEntity));
+                .flatMap(d -> indexHelper.indexDocument(d, contentEntity))
+                .map(d -> documentMapper.map(d, contentEntity));
     }
 
     private boolean isIndexSupported(ContentEntity contentEntity) {

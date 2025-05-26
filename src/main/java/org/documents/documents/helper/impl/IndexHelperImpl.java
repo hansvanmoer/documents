@@ -6,7 +6,7 @@ import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.DocumentRepository;
-import org.documents.documents.helper.ContentHelper;
+import org.documents.documents.helper.FileHelper;
 import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.DocumentMapper;
@@ -18,33 +18,46 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
+
 @AllArgsConstructor
 @Component
 @Slf4j
 public class IndexHelperImpl implements IndexHelper {
 
-    private final ContentHelper contentHelper;
     private final ContentRepository contentRepository;
     private final DocumentMapper documentMapper;
-    private final DocumentSearchRepository documentSearchRepository;
-    private final RenditionHelper renditionHelper;
     private final DocumentRepository documentRepository;
+    private final DocumentSearchRepository documentSearchRepository;
+    private final FileHelper fileHelper;
+    private final RenditionHelper renditionHelper;
 
     @Override
-    public Mono<DocumentEntity> indexDocument(DocumentEntity documentEntity) {
-        final Mono<ContentEntity> contentProducer = contentRepository.findById(documentEntity.getContentId())
-                        .flatMap(contentEntity -> renditionHelper.getRendition(contentEntity, MediaType.TEXT_PLAIN));
-        return contentProducer
-                .flatMap(content -> indexWithContent(documentEntity, content))
+    public Mono<DocumentEntity> indexDocument(DocumentEntity documentEntity, ContentEntity contentEntity) {
+        return renditionHelper.getOrRequestFile(contentEntity, MediaType.TEXT_PLAIN_VALUE)
+                .flatMap(file -> fileHelper.readToString(file, StandardCharsets.UTF_8))
+                .flatMap(text -> indexWithContent(documentEntity, text))
                 .switchIfEmpty(Mono.defer(() -> indexMetadata(documentEntity)));
     }
 
     @Override
-    public Mono<DocumentEntity> indexDocumentOrScheduleIndexation(DocumentEntity documentEntity, ContentEntity contentEntity) {
-        final Mono<ContentEntity> contentProducer = renditionHelper.getOrRequestRendition(contentEntity, MediaType.TEXT_PLAIN);
-        return contentProducer
-                .flatMap(content -> indexWithContent(documentEntity, content))
+    public Mono<DocumentEntity> indexDocumentIfRenditionExists(DocumentEntity documentEntity, ContentEntity contentEntity) {
+        return renditionHelper.getFile(contentEntity, MediaType.TEXT_PLAIN_VALUE)
+                .flatMap(file -> fileHelper.readToString(file, StandardCharsets.UTF_8))
+                .flatMap(text -> indexWithContent(documentEntity, text))
                 .switchIfEmpty(Mono.defer(() -> indexMetadata(documentEntity)));
+    }
+
+    @Override
+    public Mono<DocumentEntity> indexDocument(DocumentEntity documentEntity) {
+        return contentRepository.findById(documentEntity.getContentId())
+                .flatMap(contentEntity -> indexDocument(documentEntity, contentEntity));
+    }
+
+    @Override
+    public Mono<DocumentEntity> indexDocumentIfRenditionExists(DocumentEntity documentEntity) {
+        return contentRepository.findById(documentEntity.getContentId())
+                .flatMap(contentEntity -> indexDocumentIfRenditionExists(documentEntity, contentEntity));
     }
 
     private Mono<DocumentEntity> indexMetadata(DocumentEntity documentEntity) {
@@ -53,13 +66,18 @@ public class IndexHelperImpl implements IndexHelper {
                 .thenReturn(documentEntity);
     }
 
-    private Mono<DocumentEntity> indexWithContent(DocumentEntity documentEntity, ContentEntity contentEntity) {
-        return contentHelper.readContentAsString(contentEntity)
-                .map(text -> documentMapper.mapToSearchDocument(documentEntity, text))
-                .flatMap(document -> documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE))
-                .then(Mono.defer(() -> {
-                    documentEntity.setContentIndexStatus(ContentIndexStatus.INDEXED);
-                    return documentRepository.save(documentEntity);
-                }));
+    private Mono<DocumentEntity> indexWithContent(DocumentEntity documentEntity, String text) {
+        final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity, text);
+        return documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE)
+                .then(Mono.just(documentEntity).flatMap(this::updateEntityAfterIndexWithContent));
+    }
+
+    private Mono<DocumentEntity> updateEntityAfterIndexWithContent(DocumentEntity documentEntity) {
+        if(documentEntity.getContentIndexStatus() != ContentIndexStatus.INDEXED) {
+            documentEntity.setContentIndexStatus(ContentIndexStatus.INDEXED);
+            return documentRepository.save(documentEntity);
+        } else {
+            return Mono.just(documentEntity);
+        }
     }
 }

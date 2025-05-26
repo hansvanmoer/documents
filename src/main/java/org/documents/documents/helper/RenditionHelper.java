@@ -1,15 +1,20 @@
 package org.documents.documents.helper;
 
 import org.documents.documents.db.entity.ContentEntity;
-import org.springframework.http.MediaType;
+import org.documents.documents.db.entity.RenditionEntity;
+import org.documents.documents.file.FileReference;
 import reactor.core.publisher.Mono;
+
+import java.nio.file.Path;
 
 
 public interface RenditionHelper {
 
-    Mono<ContentEntity> getRendition(ContentEntity entity, MediaType mediaType);
+    Mono<RenditionEntity> storeRendition(ContentEntity content, String mimeType, Path file);
 
-    Mono<ContentEntity> getOrRequestRendition(ContentEntity entity, MediaType mediaType);
+    Mono<FileReference> getFile(ContentEntity contentEntity, String mimeType);
+
+    Mono<FileReference> getOrRequestFile(ContentEntity contentEntity, String mimeType);
 
     boolean isSupported(String sourceMimeType, String targetMimeType);
 

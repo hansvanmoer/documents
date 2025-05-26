@@ -2,5 +2,6 @@ package org.documents.documents.model.exception;
 
 public enum ErrorCode {
     UNKNOWN,
-    ENTITY_NOT_FOUND
+    ENTITY_NOT_FOUND,
+    FILE_COPY_FAILED
 }

@@ -15,6 +15,11 @@ public class TransformMessageListener {
 
     @RabbitListener(queues = "#{messageSettings.transformRequestedQueueName}")
     public void transformRequested(RequestTransformMessage message) {
-        runTransformHelper.runTransform(Path.of(message.getPath()), message.getSourceMimeType(), message.getTargetMimeType());
+        runTransformHelper.runTransform(
+                message.getContentUuid(),
+                message.getFileReference(),
+                message.getSourceMimeType(),
+                message.getTargetMimeType()
+        );
     }
 }
