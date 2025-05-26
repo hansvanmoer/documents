@@ -50,8 +50,18 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    public Mono<Document> get(UUID uuid) {
+        return customDocumentRepository.findByUuid(uuid).map(documentMapper::map);
+    }
+
+    @Override
     public Flux<Document> list(Pageable pageable) {
         return customDocumentRepository.find(pageable).map(documentMapper::map);
+    }
+
+    @Override
+    public Mono<Void> delete(UUID uuid) {
+        return documentRepository.findByUuid(uuid.toString()).flatMap(documentRepository::delete);
     }
 
     private Mono<Tuple2<DocumentEntity, ContentEntity>> create(ContentEntity contentEntity) {

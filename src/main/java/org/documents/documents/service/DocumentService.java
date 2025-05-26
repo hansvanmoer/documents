@@ -10,5 +10,9 @@ import java.util.UUID;
 public interface DocumentService {
     Mono<Document> create(UUID contentUuid);
 
+    Mono<Document> get(UUID uuid);
+
     Flux<Document> list(Pageable pageable);
+
+    Mono<Void> delete(UUID uuid);
 }
