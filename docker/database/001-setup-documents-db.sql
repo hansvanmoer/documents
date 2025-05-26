@@ -21,5 +21,6 @@ CREATE TABLE document (
     uuid CHARACTER(36) UNIQUE NOT NULL,
     created TIMESTAMP NOT NULL,
     content_id BIGINT NOT NULL REFERENCES content (id),
-    content_index_status VARCHAR(32) NOT NULL
+    content_index_status VARCHAR(32) NOT NULL,
+    title VARCHAR(256) NOT NULL
                       );

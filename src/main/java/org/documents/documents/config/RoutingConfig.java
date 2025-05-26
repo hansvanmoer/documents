@@ -21,6 +21,7 @@ public class RoutingConfig {
     public RouterFunction<ServerResponse> routerFunction() {
         return RouterFunctions.route()
                 .PUT(ApiConstants.CONTENT_PATH, contentHandler::upload)
+                .GET(ApiConstants.DOCUMENT_PATH, documentHandler::list)
                 .PUT(ApiConstants.DOCUMENT_PATH, documentHandler::create)
                 .build();
     }

@@ -36,7 +36,7 @@ public class IndexHelperImpl implements IndexHelper {
                         .flatMap(contentEntity -> renditionHelper.getRendition(contentEntity, MediaType.TEXT_PLAIN));
         return contentProducer
                 .flatMap(content -> indexWithContent(documentEntity, content))
-                .switchIfEmpty(Mono.just(documentEntity).flatMap(this::indexMetadata));
+                .switchIfEmpty(Mono.defer(() -> indexMetadata(documentEntity)));
     }
 
     @Override
@@ -44,26 +44,22 @@ public class IndexHelperImpl implements IndexHelper {
         final Mono<ContentEntity> contentProducer = renditionHelper.getOrRequestRendition(contentEntity, MediaType.TEXT_PLAIN);
         return contentProducer
                 .flatMap(content -> indexWithContent(documentEntity, content))
-                .switchIfEmpty(Mono.just(documentEntity).flatMap(this::indexMetadata));
+                .switchIfEmpty(Mono.defer(() -> indexMetadata(documentEntity)));
     }
 
     private Mono<DocumentEntity> indexMetadata(DocumentEntity documentEntity) {
-        final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity);
+        final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity, "");
         return documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE)
                 .thenReturn(documentEntity);
     }
 
     private Mono<DocumentEntity> indexWithContent(DocumentEntity documentEntity, ContentEntity contentEntity) {
         return contentHelper.readContentAsString(contentEntity)
-                .flatMap(text -> {
-                    final DocumentSearchDocument document = documentMapper.mapToSearchDocument(documentEntity);
-                    document.setContent(text);
-                    return documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE);
-                })
-                .thenReturn(documentEntity)
-                .flatMap(documentEntity1 -> {
+                .map(text -> documentMapper.mapToSearchDocument(documentEntity, text))
+                .flatMap(document -> documentSearchRepository.save(document, RefreshPolicy.IMMEDIATE))
+                .then(Mono.defer(() -> {
                     documentEntity.setContentIndexStatus(ContentIndexStatus.INDEXED);
                     return documentRepository.save(documentEntity);
-                });
+                }));
     }
 }

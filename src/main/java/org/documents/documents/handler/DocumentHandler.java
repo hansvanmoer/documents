@@ -1,19 +1,24 @@
 package org.documents.documents.handler;
 
 import lombok.AllArgsConstructor;
+import org.documents.documents.mapper.HandlerMapper;
 import org.documents.documents.model.api.CreateDocumentRequest;
+import org.documents.documents.model.api.Document;
 import org.documents.documents.service.DocumentService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @Component
 public class DocumentHandler {
     private final DocumentService documentService;
-
+    private final HandlerMapper handlerMapper;
     /**
      * Handles the upload requests
      *
@@ -28,6 +33,16 @@ public class DocumentHandler {
                         ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(document)
+                );
+    }
+
+    public Mono<ServerResponse> list(ServerRequest request) {
+        return documentService.list(handlerMapper.mapPageable(request))
+                .collect(Collectors.toList())
+                .flatMap(documents ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(documents)
                 );
     }
 }

@@ -3,6 +3,7 @@ package org.documents.documents.service.impl;
 import lombok.AllArgsConstructor;
 import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.entity.DocumentEntity;
+import org.documents.documents.db.repository.CustomDocumentRepository;
 import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.helper.TemporalHelper;
@@ -14,8 +15,10 @@ import org.documents.documents.model.api.Document;
 import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.service.DocumentService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -28,6 +31,7 @@ import java.util.UUID;
 public class DocumentServiceImpl implements DocumentService {
 
     private final ContentRepository contentRepository;
+    private final CustomDocumentRepository customDocumentRepository;
     private final DocumentMapper documentMapper;
     private final DocumentRepository documentRepository;
     private final IndexHelper indexHelper;
@@ -43,6 +47,11 @@ public class DocumentServiceImpl implements DocumentService {
                 .flatMap(this::create)
                 .flatMap(t -> indexHelper.indexDocumentOrScheduleIndexation(t.getT1(), t.getT2()).map(d -> Tuples.of(d, t.getT2())))
                 .map(t -> documentMapper.map(t.getT1(), t.getT2()));
+    }
+
+    @Override
+    public Flux<Document> list(Pageable pageable) {
+        return customDocumentRepository.find(pageable).map(documentMapper::map);
     }
 
     private Mono<Tuple2<DocumentEntity, ContentEntity>> create(ContentEntity contentEntity) {
