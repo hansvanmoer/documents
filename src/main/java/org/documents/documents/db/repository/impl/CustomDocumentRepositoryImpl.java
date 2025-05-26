@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.documents.documents.db.model.DocumentWithContentEntity;
 import org.documents.documents.db.repository.CustomDocumentRepository;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
