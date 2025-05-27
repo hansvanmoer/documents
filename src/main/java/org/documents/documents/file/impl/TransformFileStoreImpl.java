@@ -35,6 +35,11 @@ public class TransformFileStoreImpl implements TransformFileStore {
     }
 
     @Override
+    public Path getFilePath(UUID uuid, String mimeType) {
+        return createPath(uuid, mimeType);
+    }
+
+    @Override
     public UUID create(Path path, String mimeType) {
         final UUID uuid = uuidHelper.createUuid();
         final Path destPath = createPath(uuid, mimeType);

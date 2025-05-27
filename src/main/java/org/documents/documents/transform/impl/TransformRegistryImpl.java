@@ -12,7 +12,12 @@ public class TransformRegistryImpl implements TransformRegistry {
 
     public TransformRegistryImpl(Collection<Transform> transforms) {
         final HashMap<TransformType, Transform> mapping = new HashMap<>();
-        transforms.forEach(transform -> transform.getSupportedTransformTypes().forEach(type -> mapping.put(type, transform)));
+        transforms.forEach(transform -> transform.getSupportedTransformTypes().forEach(type -> {
+            final Transform existing = mapping.get(type);
+            if(existing == null || existing.getPriority() > transform.getPriority()) {
+                mapping.put(type, transform);
+            }
+        }));
         this.transforms = Collections.unmodifiableMap(mapping);
     }
 

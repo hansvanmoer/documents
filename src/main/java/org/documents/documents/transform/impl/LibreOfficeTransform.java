@@ -68,4 +68,14 @@ public class LibreOfficeTransform implements Transform {
                 new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.APPLICATION_PDF_VALUE)
         );
     }
+
+    @Override
+    public List<String> getPreferredSourceMimeTypes(String targetMimeType) {
+        return Collections.singletonList(targetMimeType);
+    }
+
+    @Override
+    public int getPriority() {
+        return 1;
+    }
 }

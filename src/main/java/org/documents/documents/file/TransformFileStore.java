@@ -11,6 +11,8 @@ public interface TransformFileStore {
 
     String getFileName(UUID uuid, String mimeType);
 
+    Path getFilePath(UUID uuid, String mimeType);
+
     UUID create(Path path, String mimeType);
 
     void delete(UUID uuid, String mimeType);
