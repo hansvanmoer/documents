@@ -37,7 +37,7 @@ public class RenditionController {
             description = "Requests a rendition",
             summary = "Requests a rendition, which will either be present or asynchronously requested"
     )
-    @PostMapping(ApiConstants.DOCUMENT_BY_UUID_RENDITIONS_PATH)
+    @PutMapping(ApiConstants.DOCUMENT_BY_UUID_RENDITIONS_PATH)
     public Mono<CreateRenditionResponse> create(
             @Parameter(description = "The document UUID")
             @PathVariable(ApiConstants.DOCUMENT_UUID_PATH_VARIABLE)

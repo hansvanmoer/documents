@@ -32,7 +32,7 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
 
     private static final String FIND_SQL = BASE_QUERY + " OFFSET :offset LIMIT :limit";
 
-    private static final String FIND_BY_UUID_SQL = BASE_QUERY + " WHERE uuid = :uuid";
+    private static final String FIND_BY_UUID_SQL = BASE_QUERY + " AND d.uuid = :uuid";
 
     private final DatabaseClient databaseClient;
 

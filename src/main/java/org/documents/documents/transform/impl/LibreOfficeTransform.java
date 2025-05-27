@@ -64,7 +64,8 @@ public class LibreOfficeTransform implements Transform {
     @Override
     public Set<TransformType> getSupportedTransformTypes() {
         return Set.of(
-                new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.TEXT_PLAIN.toString())
+                new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.TEXT_PLAIN.toString()),
+                new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.APPLICATION_PDF_VALUE)
         );
     }
 }

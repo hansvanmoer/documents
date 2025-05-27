@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
@@ -60,5 +61,18 @@ public class DocumentController {
         final Pageable pageable = Optional.ofNullable(searchDocumentRequest.pagination())
                 .map(controllerHelper::getPageable).orElseGet(controllerHelper::getDefaultPageable);
         return documentService.search(pageable, searchDocumentRequest.term());
+    }
+
+    @Operation(
+            description = "Gets a document by UUID",
+            summary = "Gets a single document by its UUID"
+    )
+    @GetMapping(ApiConstants.DOCUMENT_BY_UUID_PATH)
+    public Mono<Document> getByUuid(
+            @Parameter(description = "The document UUID")
+            @PathVariable(ApiConstants.DOCUMENT_UUID_PATH_VARIABLE)
+            UUID documentUuid
+    ) {
+        return documentService.get(documentUuid);
     }
 }
