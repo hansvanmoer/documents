@@ -4,7 +4,6 @@ package org.documents.documents.model.api;
  * All REST API constants
  */
 public interface ApiConstants {
-
     /**
      * The API base path
      */
@@ -18,7 +17,10 @@ public interface ApiConstants {
     /**
      * Document path
      */
-    String DOCUMENT_PATH = API_BASE_PATH + "/documents";
+    String DOCUMENTS_PATH = API_BASE_PATH + "/documents";
 
+    /**
+     * Search document path
+     */
     String SEARCH_DOCUMENTS_PATH = API_BASE_PATH + "/documents/search";
 }

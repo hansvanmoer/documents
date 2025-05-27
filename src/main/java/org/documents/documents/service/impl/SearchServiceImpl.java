@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.helper.IndexHelper;
-import org.documents.documents.model.api.ContentIndexStatus;
+import org.documents.documents.db.entity.ContentIndexStatus;
 import org.documents.documents.service.SearchService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

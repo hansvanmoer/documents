@@ -1,17 +1,15 @@
 package org.documents.documents.db.repository.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.documents.documents.db.model.DocumentWithContentEntity;
 import org.documents.documents.db.repository.CustomDocumentRepository;
-import org.documents.documents.model.api.ContentIndexStatus;
+import org.documents.documents.db.entity.ContentIndexStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;

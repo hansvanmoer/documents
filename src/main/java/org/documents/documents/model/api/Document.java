@@ -1,7 +1,18 @@
 package org.documents.documents.model.api;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public record Document(UUID uuid, ZonedDateTime created, String mimeType, String title) {
-}
+@Schema(description = "A document created in the store")
+public record Document(
+        @Schema(description = "The document's unique ID")
+        UUID uuid,
+        @Schema(description = "The timestamp on which the document was created")
+        ZonedDateTime created,
+        @Schema(description = "The mime type of the document")
+        String mimeType,
+        @Schema(description = "The document title")
+        String title
+) {}

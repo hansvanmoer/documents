@@ -2,10 +2,7 @@ package org.documents.documents.search.document;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.time.ZonedDateTime;
 
@@ -30,6 +27,7 @@ public class DocumentSearchDocument {
     @Field(type = FieldType.Text)
     private String title;
 
+    @WriteOnlyProperty
     @Field(type = FieldType.Text)
     private String content;
 }

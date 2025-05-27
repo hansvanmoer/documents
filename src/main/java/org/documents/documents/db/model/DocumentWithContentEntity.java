@@ -1,7 +1,7 @@
 package org.documents.documents.db.model;
 
 import lombok.Data;
-import org.documents.documents.model.api.ContentIndexStatus;
+import org.documents.documents.db.entity.ContentIndexStatus;
 
 import java.time.LocalDateTime;
 

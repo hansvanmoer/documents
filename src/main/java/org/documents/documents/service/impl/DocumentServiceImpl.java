@@ -9,7 +9,7 @@ import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.helper.UuidHelper;
 import org.documents.documents.mapper.DocumentMapper;
-import org.documents.documents.model.api.ContentIndexStatus;
+import org.documents.documents.db.entity.ContentIndexStatus;
 import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.model.api.Document;
 import org.documents.documents.db.repository.ContentRepository;
@@ -64,7 +64,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Mono<Void> delete(UUID uuid) {
-        return documentRepository.findByUuid(uuid.toString()).flatMap(documentRepository::delete);
+        return documentRepository.findByUuid(uuid.toString()).flatMap(entity ->
+            documentRepository.delete(entity).then(documentSearchRepository.deleteById(entity.getId()))
+        );
     }
 
     private Mono<Document> create(String title, ContentEntity contentEntity) {

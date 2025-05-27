@@ -1,7 +1,6 @@
 package org.documents.documents.db.entity;
 
 import lombok.Data;
-import org.documents.documents.model.api.ContentIndexStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;

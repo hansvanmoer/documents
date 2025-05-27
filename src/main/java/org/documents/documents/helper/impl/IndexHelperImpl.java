@@ -13,7 +13,7 @@ import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.DocumentMapper;
 import org.documents.documents.model.DocumentAndContentEntities;
-import org.documents.documents.model.api.ContentIndexStatus;
+import org.documents.documents.db.entity.ContentIndexStatus;
 import org.documents.documents.search.repository.DocumentSearchRepository;
 import org.springframework.data.elasticsearch.core.RefreshPolicy;
 import org.springframework.http.MediaType;
