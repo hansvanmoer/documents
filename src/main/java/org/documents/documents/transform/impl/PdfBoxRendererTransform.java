@@ -22,7 +22,7 @@ import java.util.*;
 @AllArgsConstructor
 @Component
 @Slf4j
-public class PdfBoxTransform implements Transform {
+public class PdfBoxRendererTransform implements Transform {
 
     private static final Map<String, String> OUTPUT_FORMATS = Map.of(MediaType.IMAGE_PNG_VALUE, "png");
 
