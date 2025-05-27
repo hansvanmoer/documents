@@ -1,44 +1,33 @@
 package org.documents.documents.file.impl;
 
-import org.documents.documents.file.FileReference;
-import org.documents.documents.file.FileStore;
-import org.documents.documents.file.FileStoreRegistry;
-import org.documents.documents.file.FileStoreType;
+import lombok.Getter;
+import org.documents.documents.file.*;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
-
-import java.nio.file.Path;
 
 @Component
+@Getter
 public class FileStoreRegistryImpl implements FileStoreRegistry {
 
     private final FileStore contentFileStore;
     private final FileStore renditionFileStore;
+    private final TransformFileStore transformFileStore;
 
     public FileStoreRegistryImpl(
             @Qualifier("contentFileStore")
             FileStore contentFileStore,
             @Qualifier("renditionFileStore")
-            FileStore renditionFileStore
+            FileStore renditionFileStore,
+            TransformFileStore transformFileStore
     ) {
         this.contentFileStore = contentFileStore;
         this.renditionFileStore = renditionFileStore;
+        this.transformFileStore = transformFileStore;
     }
 
     @Override
-    public Flux<DataBuffer> read(FileReference fileReference) {
-        return getFileStore(fileReference.fileStoreType()).read(fileReference.uuid());
-    }
-
-    @Override
-    public void copy(FileReference fileReference, Path targetPath) {
-        getFileStore(fileReference.fileStoreType()).copy(fileReference.uuid(), targetPath);
-    }
-
-    private FileStore getFileStore(FileStoreType fileStoreType) {
-        return switch (fileStoreType) {
+    public FileStore getFileStore(FileStoreType type) {
+        return switch (type) {
             case CONTENT -> contentFileStore;
             case RENDITION -> renditionFileStore;
         };

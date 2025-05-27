@@ -6,6 +6,7 @@ import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.model.DocumentWithContentEntity;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.mapper.DocumentMapper;
+import org.documents.documents.model.DocumentAndContentEntities;
 import org.documents.documents.model.api.Document;
 import org.documents.documents.search.document.DocumentSearchDocument;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,6 @@ public class DocumentMapperImpl implements DocumentMapper {
                 UUID.fromString(documentEntity.getUuid()),
                 temporalHelper.fromDatabaseTime(documentEntity.getCreated()),
                 contentEntity.getMimeType(),
-                documentEntity.getContentIndexStatus(),
                 documentEntity.getTitle()
         );
     }
@@ -35,20 +35,33 @@ public class DocumentMapperImpl implements DocumentMapper {
                 UUID.fromString(input.getUuid()),
                 temporalHelper.fromDatabaseTime(input.getCreated()),
                 input.getMimeType(),
-                input.getContentIndexStatus(),
                 input.getTitle()
         );
     }
 
     @Override
-    public DocumentSearchDocument mapToSearchDocument(DocumentEntity documentEntity, String text) {
+    public Document map(DocumentSearchDocument input) {
+        return new Document(
+                UUID.fromString(input.getUuid()),
+                input.getCreated(),
+                input.getMimeType(),
+                input.getTitle()
+        );
+    }
+
+    @Override
+    public DocumentSearchDocument mapToDocumentSearchDocument(DocumentAndContentEntities input) {
+        final DocumentEntity documentEntity = input.getDocumentEntity();
+        final ContentEntity contentEntity = input.getContentEntity();
         final DocumentSearchDocument searchDocument = new DocumentSearchDocument();
         searchDocument.setId(documentEntity.getId());
         searchDocument.setUuid(documentEntity.getUuid());
+        searchDocument.setMimeType(contentEntity.getMimeType());
         searchDocument.setTitle(documentEntity.getTitle());
-        searchDocument.setCreated(documentEntity.getCreated());
+        searchDocument.setCreated(temporalHelper.fromDatabaseTime(documentEntity.getCreated()));
         searchDocument.setTitle(documentEntity.getTitle());
-        searchDocument.setContent(text);
+        searchDocument.setContent(input.getContentAsText());
         return searchDocument;
     }
+
 }

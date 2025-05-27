@@ -1,13 +1,24 @@
 package org.documents.documents.file;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import reactor.core.publisher.Flux;
+import org.documents.documents.file.impl.FileContentImpl;
 
-import java.nio.file.Path;
+import java.util.UUID;
 
 public interface FileStoreRegistry {
 
-    Flux<DataBuffer> read(FileReference fileReference);
+    FileStore getFileStore(FileStoreType fileStoreType);
 
-    void copy(FileReference fileReference, Path targetPath);
+    TransformFileStore getTransformFileStore();
+
+    default UUID copyToTransformFileStore(FileReference fileReference, String mimeType) {
+        return getFileStore(fileReference.fileStoreType()).copyTo(
+                fileReference.uuid(),
+                mimeType,
+                getTransformFileStore()
+        );
+    }
+
+    default FileContent createFileProxy(FileReference fileReference) {
+        return new FileContentImpl(getFileStore(fileReference.fileStoreType()), fileReference.uuid());
+    }
 }

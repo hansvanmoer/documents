@@ -6,31 +6,30 @@ import org.documents.documents.db.entity.RenditionEntity;
 import org.documents.documents.file.FileReference;
 import org.documents.documents.file.FileStore;
 import org.documents.documents.file.FileStoreType;
+import org.documents.documents.file.TransformFileStore;
 import org.documents.documents.helper.*;
 import org.documents.documents.db.repository.RenditionRepository;
 import org.documents.documents.transform.TransformRegistry;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.nio.file.Path;
 import java.util.UUID;
 
 @AllArgsConstructor
 @Component
 public class RenditionHelperImpl implements RenditionHelper {
 
-    private final FileHelper fileHelper;
     private final FileStore renditionFileStore;
     private final RenditionRepository renditionRepository;
     private final RequestTransformHelper requestTransformHelper;
     private final TemporalHelper temporalHelper;
+    private final TransformFileStore transformFileStore;
     private final TransformRegistry transformRegistry;
 
     @Override
-    public Mono<RenditionEntity> storeRendition(ContentEntity content, String mimeType, Path file) {
-        return renditionFileStore.create(fileHelper.readFromPath(file))
+    public Mono<RenditionEntity> storeRendition(ContentEntity content, String mimeType, UUID transformedFileUuid) {
+        return transformFileStore.copyAndDelete(transformedFileUuid, mimeType, renditionFileStore)
                 .flatMap(uuid -> {
                     final RenditionEntity entity = new RenditionEntity();
                     entity.setUuid(uuid.toString());

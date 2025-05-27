@@ -3,12 +3,12 @@ package org.documents.documents.transform;
 import org.documents.documents.model.transform.TransformResult;
 import org.documents.documents.model.transform.TransformType;
 
-import java.nio.file.Path;
 import java.util.Set;
+import java.util.UUID;
 
 public interface Transform {
 
-    TransformResult transform(Path sourcePath, String sourceMimeType, String targetMimeType, String targetExtension);
+    TransformResult transform(UUID uuid, String sourceMimeType, String targetMimeType);
 
     Set<TransformType> getSupportedTransformTypes();
 }

@@ -22,7 +22,7 @@ public class IndexContentScheduler {
         log.debug("running index content scheduler");
         // Note that we need to ensure that reactor producers terminate within this thread
         // otherwise the scheduling delay will not work
-        final List<UUID> uuids = searchService.indexDocuments().collect(Collectors.toList()).block();
-        log.debug("indexed {} documents", uuids.size());
+        final List<UUID> uuids = searchService.indexWaitingDocumentsWithTextRenditions().collect(Collectors.toList()).block();
+        log.debug("indexed {} documents", uuids == null ? 0 : uuids.size());
     }
 }

@@ -10,5 +10,5 @@ public interface SearchService {
      * has not been indexed
      * @return a producer with the documents' UUID's
      */
-    Flux<UUID> indexDocuments();
+    Flux<UUID> indexWaitingDocumentsWithTextRenditions();
 }

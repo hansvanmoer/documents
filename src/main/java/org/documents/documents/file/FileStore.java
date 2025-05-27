@@ -9,10 +9,15 @@ import java.util.UUID;
 
 public interface FileStore {
 
+    UUID create(Path path);
+
     Mono<UUID> create(Flux<DataBuffer> content);
 
     Flux<DataBuffer> read(UUID uuid);
 
-    void copy(UUID uuid, Path target);
+    UUID copyTo(UUID uuid, FileStore target);
 
+    UUID copyTo(UUID uuid, String mimeType, TransformFileStore target);
+
+    boolean isLocal();
 }

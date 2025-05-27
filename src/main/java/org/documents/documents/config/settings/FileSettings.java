@@ -14,5 +14,6 @@ import java.nio.file.Path;
 public class FileSettings {
     private Path contentPath;
     private Path renditionPath;
+    private Path transformPath;
     private int readBufferSize;
 }

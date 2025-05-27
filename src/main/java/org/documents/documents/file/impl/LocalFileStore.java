@@ -3,7 +3,7 @@ package org.documents.documents.file.impl;
 import lombok.AllArgsConstructor;
 import org.documents.documents.config.settings.FileSettings;
 import org.documents.documents.file.FileStore;
-import org.documents.documents.helper.TemporalHelper;
+import org.documents.documents.file.TransformFileStore;
 import org.documents.documents.helper.UuidHelper;
 import org.documents.documents.model.exception.ErrorCode;
 import org.documents.documents.model.exception.InternalServerErrorException;
@@ -17,7 +17,7 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -27,6 +27,19 @@ public class LocalFileStore implements FileStore {
     private final DataBufferFactory dataBufferFactory;
     private final FileSettings fileSettings;
     private final UuidHelper uuidHelper;
+
+    @Override
+    public UUID create(Path path) {
+        final UUID uuid = uuidHelper.createUuid();
+        final Path destPath = createPath(uuid);
+        try {
+            Files.createDirectories(destPath.getParent());
+            Files.copy(path, destPath);
+        } catch(IOException e) {
+            throw new InternalServerErrorException(ErrorCode.FILE_COPY_FAILED, e, "could not copy file %s from path %s", uuid, path);
+        }
+        return uuid;
+    }
 
     @Override
     public Mono<UUID> create(Flux<DataBuffer> content) {
@@ -39,20 +52,31 @@ public class LocalFileStore implements FileStore {
 
     @Override
     public Flux<DataBuffer> read(UUID uuid) {
-        return DataBufferUtils.read(getPath(uuid), dataBufferFactory, fileSettings.getReadBufferSize());
+        return DataBufferUtils.read(createPath(uuid), dataBufferFactory, fileSettings.getReadBufferSize());
     }
 
     @Override
-    public void copy(UUID uuid, Path targetPath) {
-        final Path sourcePath = getPath(uuid);
-        try {
-            Files.copy(sourcePath, targetPath);
-        } catch (IOException e) {
-            throw new InternalServerErrorException(ErrorCode.FILE_COPY_FAILED, e, "could not copy file %s", uuid);
+    public UUID copyTo(UUID uuid, FileStore target) {
+        if(target.isLocal()) {
+            final Path srcPath = createPath(uuid);
+            return target.create(srcPath);
+        } else {
+            return Objects.requireNonNull(target.create(read(uuid)).block());
         }
     }
 
-    private Path getPath(UUID uuid) {
+    @Override
+    public UUID copyTo(UUID uuid, String mimeType, TransformFileStore target) {
+        final Path srcPath = createPath(uuid);
+        return target.create(srcPath, mimeType);
+    }
+
+    @Override
+    public boolean isLocal() {
+        return true;
+    }
+
+    private Path createPath(UUID uuid) {
         final String uuidString = uuid.toString();
         return basePath
                 .resolve(uuidString.substring(0, 2))
@@ -63,7 +87,7 @@ public class LocalFileStore implements FileStore {
 
     private Mono<Path> createFile(UUID uuid) {
         return Mono.fromCallable(() -> {
-            final Path path = getPath(uuid);
+            final Path path = createPath(uuid);
             Files.createDirectories(path.getParent());
             Files.createFile(path);
             return path;
