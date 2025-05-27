@@ -14,5 +14,7 @@ public interface DocumentService {
 
     Flux<Document> list(Pageable pageable);
 
+    Flux<Document> search(Pageable pageable, String term);
+
     Mono<Void> delete(UUID uuid);
 }

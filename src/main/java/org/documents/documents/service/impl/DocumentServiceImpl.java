@@ -14,6 +14,8 @@ import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.model.api.Document;
 import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.DocumentRepository;
+import org.documents.documents.search.document.DocumentSearchDocument;
+import org.documents.documents.search.repository.DocumentSearchRepository;
 import org.documents.documents.service.DocumentService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -32,6 +34,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final CustomDocumentRepository customDocumentRepository;
     private final DocumentMapper documentMapper;
     private final DocumentRepository documentRepository;
+    private final DocumentSearchRepository documentSearchRepository;
     private final IndexHelper indexHelper;
     private final RenditionHelper renditionHelper;
     private final TemporalHelper temporalHelper;
@@ -52,6 +55,14 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Flux<Document> list(Pageable pageable) {
         return customDocumentRepository.find(pageable).map(documentMapper::map);
+    }
+
+    @Override
+    public Flux<Document> search(Pageable pageable, String term) {
+        return documentSearchRepository.findByContent(term)
+                .map(DocumentSearchDocument::getId)
+                .flatMap(documentRepository::findById)
+                .flatMap(documentEntity -> contentRepository.findById(documentEntity.getContentId()).map(c -> documentMapper.map(documentEntity, c)));
     }
 
     @Override

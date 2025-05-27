@@ -29,40 +29,45 @@ public class RunTransformHelperImpl implements RunTransformHelper {
     private final TransformRegistry transformRegistry;
     private final TransformSettings transformSettings;
     private final ContentRepository contentRepository;
+    private final UuidHelper uuidHelper;
 
     @Override
     public void runTransform(UUID contentUuid, FileReference fileReference, String sourceMimeType, String targetMimeType) {
-        final Optional<Transform> foundTransform = transformRegistry.getTransform(sourceMimeType, targetMimeType);
-        if(foundTransform.isPresent()) {
-            final Transform transform = foundTransform.get();
-            final Optional<String> foundSourceExtension = mimeTypeHelper.getExtension(sourceMimeType);
-            if(foundSourceExtension.isPresent()) {
-                final String sourceExtension = foundSourceExtension.get();
-                final Optional<String> foundTargetExtension = mimeTypeHelper.getExtension(targetMimeType);
-                if(foundTargetExtension.isPresent()) {
-                    final String targetExtension = foundTargetExtension.get();
-                    final Path sourcePath = transformSettings.getPath().resolve(contentUuid + sourceExtension);
-                    fileStoreRegistry.copy(fileReference, sourcePath);
-                    final TransformResult result = transform.transform(sourcePath, sourceMimeType, targetMimeType, targetExtension);
-                    if(result.isSuccess()) {
-                        onSuccess(contentUuid, result.getResultPath(), targetMimeType);
+        try {
+            final Optional<Transform> foundTransform = transformRegistry.getTransform(sourceMimeType, targetMimeType);
+            if (foundTransform.isPresent()) {
+                final Transform transform = foundTransform.get();
+                final Optional<String> foundSourceExtension = mimeTypeHelper.getExtension(sourceMimeType);
+                if (foundSourceExtension.isPresent()) {
+                    final String sourceExtension = foundSourceExtension.get();
+                    final Optional<String> foundTargetExtension = mimeTypeHelper.getExtension(targetMimeType);
+                    if (foundTargetExtension.isPresent()) {
+                        final String targetExtension = foundTargetExtension.get();
+                        final Path sourcePath = transformSettings.getPath().resolve(uuidHelper.createUuid() + sourceExtension);
+                        fileStoreRegistry.copy(fileReference, sourcePath);
+                        final TransformResult result = transform.transform(sourcePath, sourceMimeType, targetMimeType, targetExtension);
+                        if (result.isSuccess()) {
+                            onSuccess(contentUuid, result.getResultPath(), targetMimeType);
+                        } else {
+                            onFailure(contentUuid, result.getMessage());
+                        }
+                        try {
+                            Files.deleteIfExists(sourcePath);
+                            Files.deleteIfExists(result.getResultPath());
+                        } catch (IOException e) {
+                            log.error("failed to clean up after transform {}", contentUuid, e);
+                        }
                     } else {
-                        onFailure(contentUuid, result.getMessage());
-                    }
-                    try {
-                        Files.deleteIfExists(sourcePath);
-                        Files.deleteIfExists(result.getResultPath());
-                    } catch(IOException e) {
-                        log.error("failed to clean up after transform {}", contentUuid, e);
+                        log.info("no extension found for document {} and target mime type {}", fileReference, targetMimeType);
                     }
                 } else {
-                    log.info("no extension found for document {} and target mime type {}", fileReference, targetMimeType);
+                    log.info("no extension found for document {} and source mime type {}", fileReference, sourceMimeType);
                 }
             } else {
-                log.info("no extension found for document {} and source mime type {}", fileReference, sourceMimeType);
+                log.info("no transform found for document {} and mime types {} -> {}", fileReference, sourceMimeType, targetMimeType);
             }
-        } else {
-            log.info("no transform found for document {} and mime types {} -> {}", fileReference, sourceMimeType, targetMimeType);
+        } catch(Exception e) {
+            log.error("failed to run transform", e);
         }
     }
 

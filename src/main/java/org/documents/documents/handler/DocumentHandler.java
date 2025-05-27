@@ -42,4 +42,14 @@ public class DocumentHandler {
                                 .bodyValue(documents)
                 );
     }
+
+    public Mono<ServerResponse> search(ServerRequest request) {
+        return documentService.search(handlerMapper.mapPageable(request), request.queryParam("term").orElse(""))
+                .collect(Collectors.toList())
+                .flatMap(documents ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(documents)
+                );
+    }
 }

@@ -56,8 +56,8 @@ public class LibreOfficeTransform implements Transform {
     }
 
     private Path replaceExtension(Path sourcePath, String targetExtension) {
-        final String sourceExtension = FilenameUtils.getExtension(sourcePath.toString());
-        final String fileName = "." + sourcePath.getFileName().toString();
+        final String sourceExtension = "." + FilenameUtils.getExtension(sourcePath.toString());
+        final String fileName = sourcePath.getFileName().toString();
         return sourcePath.getParent().resolve(fileName.replace(sourceExtension, targetExtension));
     }
 

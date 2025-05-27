@@ -19,4 +19,6 @@ public interface ApiConstants {
      * Document path
      */
     String DOCUMENT_PATH = API_BASE_PATH + "/documents";
+
+    String SEARCH_DOCUMENTS_PATH = API_BASE_PATH + "/documents/search";
 }

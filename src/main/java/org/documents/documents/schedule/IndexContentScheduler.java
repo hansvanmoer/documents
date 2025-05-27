@@ -6,6 +6,10 @@ import org.documents.documents.service.SearchService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @Configuration
 @Slf4j
@@ -18,6 +22,7 @@ public class IndexContentScheduler {
         log.debug("running index content scheduler");
         // Note that we need to ensure that reactor producers terminate within this thread
         // otherwise the scheduling delay will not work
-        searchService.indexDocuments().blockLast();
+        final List<UUID> uuids = searchService.indexDocuments().collect(Collectors.toList()).block();
+        log.debug("indexed {} documents", uuids.size());
     }
 }

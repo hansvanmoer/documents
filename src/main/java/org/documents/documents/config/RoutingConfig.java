@@ -22,6 +22,7 @@ public class RoutingConfig {
         return RouterFunctions.route()
                 .PUT(ApiConstants.CONTENT_PATH, contentHandler::upload)
                 .GET(ApiConstants.DOCUMENT_PATH, documentHandler::list)
+                .GET(ApiConstants.SEARCH_DOCUMENTS_PATH, documentHandler::search)
                 .PUT(ApiConstants.DOCUMENT_PATH, documentHandler::create)
                 .build();
     }
