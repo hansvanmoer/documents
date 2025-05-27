@@ -28,6 +28,12 @@ public class RenditionHelperImpl implements RenditionHelper {
     private final TransformRegistry transformRegistry;
 
     @Override
+    public Mono<RenditionEntity> getOrRequestRendition(ContentEntity contentEntity, String mimeType) {
+        return renditionRepository.findByContentIdAndMimeType(contentEntity.getId(), mimeType)
+                .switchIfEmpty(requestTransform(contentEntity, mimeType).then(Mono.empty()));
+    }
+
+    @Override
     public Mono<RenditionEntity> storeRendition(ContentEntity content, String mimeType, UUID transformedFileUuid) {
         return transformFileStore.copyAndDelete(transformedFileUuid, mimeType, renditionFileStore)
                 .flatMap(uuid -> {
@@ -55,8 +61,7 @@ public class RenditionHelperImpl implements RenditionHelper {
         if(contentEntity.getMimeType().equals(mimeType)) {
             return Mono.just(new FileReference(FileStoreType.CONTENT, UUID.fromString(contentEntity.getUuid())));
         } else {
-            return renditionRepository.findByContentIdAndMimeType(contentEntity.getId(), mimeType)
-                    .switchIfEmpty(requestTransform(contentEntity, mimeType).then(Mono.empty()))
+            return getOrRequestRendition(contentEntity, mimeType)
                     .map(renditionEntity -> new FileReference(FileStoreType.RENDITION, UUID.fromString(renditionEntity.getUuid())));
         }
     }

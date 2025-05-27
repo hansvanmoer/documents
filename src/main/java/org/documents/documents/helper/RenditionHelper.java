@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public interface RenditionHelper {
 
+    Mono<RenditionEntity> getOrRequestRendition(ContentEntity contentEntity, String mimeType);
+
     Mono<RenditionEntity> storeRendition(ContentEntity content, String mimeType, UUID transformedFileUuid);
 
     Mono<FileReference> getFile(ContentEntity contentEntity, String mimeType);
