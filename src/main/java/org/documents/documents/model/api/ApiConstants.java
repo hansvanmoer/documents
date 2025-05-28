@@ -6,9 +6,19 @@ package org.documents.documents.model.api;
 public interface ApiConstants {
 
     /**
+     * Mime type parameter
+     */
+    String MIME_TYPE_PARAMETER = "mime-type";
+
+    /**
      * The document UUID
      */
     String DOCUMENT_UUID_PATH_VARIABLE = "document-uuid";
+
+    /**
+     * The rendition UUID
+     */
+    String RENDITION_UUID_PATH_VARIABLE = "rendition-uuid";
 
     /**
      * The API base path
@@ -39,4 +49,14 @@ public interface ApiConstants {
      * Search document path
      */
     String SEARCH_DOCUMENTS_PATH = API_BASE_PATH + "/documents/search";
+
+    /**
+     * Renditions
+     */
+    String RENDITIONS_PATH = API_BASE_PATH + "/renditions";
+
+    /**
+     * Rendition by UUID path
+     */
+    String RENDITION_BY_UUID_PATH = API_BASE_PATH + "/rendition-by-uuid/{" + RENDITION_UUID_PATH_VARIABLE + "}";
 }
