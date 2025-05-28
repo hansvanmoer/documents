@@ -3,18 +3,21 @@ package org.documents.documents.helper.impl;
 import lombok.AllArgsConstructor;
 import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.entity.RenditionEntity;
+import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.file.FileReference;
 import org.documents.documents.file.FileStore;
 import org.documents.documents.file.FileStoreType;
 import org.documents.documents.file.TransformFileStore;
 import org.documents.documents.helper.*;
 import org.documents.documents.db.repository.RenditionRepository;
+import org.documents.documents.model.ContentAndRenditionEntities;
 import org.documents.documents.transform.TransformRegistry;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Component
@@ -26,6 +29,13 @@ public class RenditionHelperImpl implements RenditionHelper {
     private final TemporalHelper temporalHelper;
     private final TransformFileStore transformFileStore;
     private final TransformRegistry transformRegistry;
+    private final ContentRepository contentRepository;
+
+    @Override
+    public Mono<ContentAndRenditionEntities> getContentAndRenditions(UUID contentUuid) {
+        return contentRepository.findByUuid(contentUuid.toString())
+                .flatMap(this::getContentAndRenditionEntities);
+    }
 
     @Override
     public Mono<RenditionEntity> getOrRequestRendition(ContentEntity contentEntity, String mimeType) {
@@ -75,10 +85,15 @@ public class RenditionHelperImpl implements RenditionHelper {
         return Mono.fromRunnable(
                 () -> requestTransformHelper.requestTransform(
                         UUID.fromString(contentEntity.getUuid()),
-                        new FileReference(FileStoreType.CONTENT, UUID.fromString(contentEntity.getUuid())),
-                        contentEntity.getMimeType(),
                         targetMimeType
                 )
         ).subscribeOn(Schedulers.boundedElastic()).then(Mono.empty());
+    }
+
+
+    private Mono<ContentAndRenditionEntities> getContentAndRenditionEntities(ContentEntity contentEntity) {
+        return renditionRepository.findByContentId(contentEntity.getId())
+                .collect(Collectors.toList())
+                .map(renditions -> new ContentAndRenditionEntities(contentEntity, renditions));
     }
 }

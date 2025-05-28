@@ -39,14 +39,14 @@ public class PdfBoxTextStripperTransform implements Transform {
                 Files.createDirectories(targetPath.getParent());
                 Files.createFile(targetPath);
                 Files.writeString(targetPath, text, StandardCharsets.UTF_8);
-                return new TransformResult(true, null);
+                return new TransformResult(Collections.singleton(targetMimeType));
             } catch(IOException e){
                 log.error("unable to write text", e);
-                return new TransformResult(false, "unable to write text: " + e.getMessage());
+                return new TransformResult("unable to write text: " + e.getMessage());
             }
         } catch(IOException e) {
             log.error("unable to load pdf file", e);
-            return new TransformResult(false, "unable to load pdf file: " + e.getMessage());
+            return new TransformResult("unable to load pdf file: " + e.getMessage());
         }
     }
 

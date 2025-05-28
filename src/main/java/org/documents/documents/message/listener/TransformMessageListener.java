@@ -6,8 +6,6 @@ import org.documents.documents.message.payload.RequestTransformMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Path;
-
 @AllArgsConstructor
 @Component
 public class TransformMessageListener {
@@ -17,8 +15,6 @@ public class TransformMessageListener {
     public void transformRequested(RequestTransformMessage message) {
         runTransformHelper.runTransform(
                 message.getContentUuid(),
-                message.getFileReference(),
-                message.getSourceMimeType(),
                 message.getTargetMimeType()
         );
     }

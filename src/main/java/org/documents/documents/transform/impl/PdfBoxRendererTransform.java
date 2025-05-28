@@ -32,7 +32,7 @@ public class PdfBoxRendererTransform implements Transform {
     public TransformResult transform(UUID uuid, String sourceMimeType, String targetMimeType) {
         final String outputFormat = OUTPUT_FORMATS.get(targetMimeType);
         if(outputFormat == null) {
-            return new TransformResult(false, "unsupported output format: " + targetMimeType);
+            return new TransformResult("unsupported output format: " + targetMimeType);
         }
         try(PDDocument document = Loader.loadPDF(transformFileStore.getFilePath(uuid, sourceMimeType).toFile())){
             final PDFRenderer pdfRenderer = new PDFRenderer(document);
@@ -40,14 +40,14 @@ public class PdfBoxRendererTransform implements Transform {
             final Path destinationPath = transformFileStore.getFilePath(uuid, targetMimeType);
             try {
                 ImageIO.write(image, outputFormat, destinationPath.toFile());
-                return new TransformResult(true, null);
+                return new TransformResult(Collections.singleton(targetMimeType));
             } catch(IOException e) {
                 log.error("unable to write image", e);
-                return new TransformResult(false, "unable to write image: " + e.getMessage());
+                return new TransformResult("unable to write image: " + e.getMessage());
             }
         } catch(IOException e) {
             log.error("unable to load pdf file", e);
-            return new TransformResult(false, "unable to load pdf file: " + e.getMessage());
+            return new TransformResult("unable to load pdf file: " + e.getMessage());
         }
     }
 

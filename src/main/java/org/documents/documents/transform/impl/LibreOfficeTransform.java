@@ -39,7 +39,7 @@ public class LibreOfficeTransform implements Transform {
         command.addAll(ARGS);
         final String outputFormat = OUTPUT_FORMATS.get(targetMimeType);
         if(outputFormat == null) {
-            return new TransformResult(false, String.format("Target mime type %s is not supported", targetMimeType));
+            return new TransformResult(String.format("Target mime type %s is not supported", targetMimeType));
         }
         command.add(outputFormat);
         command.add(transformFileStore.getFileName(uuid, sourceMimeType));
@@ -49,15 +49,15 @@ public class LibreOfficeTransform implements Transform {
             final Process process = processBuilder.start();
             process.waitFor(transformSettings.getTimeoutInMilliseconds(), TimeUnit.MILLISECONDS);
             if(process.exitValue() == 0) {
-                return new TransformResult(true, null);
+                return new TransformResult(Collections.singleton(targetMimeType));
             } else {
                 try(Reader reader = new InputStreamReader(process.getErrorStream())) {
-                    return new TransformResult(false, IOUtils.toString(reader));
+                    return new TransformResult(IOUtils.toString(reader));
                 }
             }
         } catch(IOException | InterruptedException e) {
             log.error("error while converting", e);
-            return new TransformResult(false, e.getMessage());
+            return new TransformResult(e.getMessage());
         }
     }
 

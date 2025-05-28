@@ -35,12 +35,8 @@ public class CompositeTransform implements Transform {
 
     @Override
     public TransformResult transform(UUID uuid, String sourceMimeType, String targetMimeType) {
-        final TransformResult result = first.transform(uuid, sourceMimeType, intermediateMimeType);
-        if(result.success()) {
-            return second.transform(uuid, intermediateMimeType, targetMimeType);
-        } else {
-            return result;
-        }
+        return first.transform(uuid, sourceMimeType, intermediateMimeType)
+                .andThen(() -> second.transform(uuid, intermediateMimeType, targetMimeType));
     }
 
     @Override
