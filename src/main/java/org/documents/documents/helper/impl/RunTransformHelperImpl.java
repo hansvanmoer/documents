@@ -38,8 +38,8 @@ public class RunTransformHelperImpl implements RunTransformHelper {
                 if (foundTransform.isPresent()) {
                     final Transform transform = foundTransform.get();
                     final TypedFileReference bestFileReference = getBestFileReference(entities, transform, targetMimeType);
-                    final UUID uuid = fileStoreRegistry.copyToTransformFileStore(bestFileReference.toFileReference(), bestFileReference.mimeType());
-                    final TransformResult result = transform.transform(uuid, bestFileReference.mimeType(), targetMimeType);
+                    final UUID uuid = fileStoreRegistry.copyToTransformFileStore(bestFileReference.getFileReference(), bestFileReference.getMimeType());
+                    final TransformResult result = transform.transform(uuid, bestFileReference.getMimeType(), targetMimeType);
                     if (result.isSuccess()) {
                         onSuccess(contentUuid, uuid, result.getOutputMimeTypes());
                     } else {
@@ -58,15 +58,15 @@ public class RunTransformHelperImpl implements RunTransformHelper {
         final List<String> preferredMimeTypes = transform.getPreferredSourceMimeTypes(targetMimeType);
         for(String preferredMimeType : preferredMimeTypes) {
             if (entities.getContentEntity().getMimeType().equals(preferredMimeType)) {
-                return new TypedFileReference(FileStoreType.CONTENT, UUID.fromString(entities.getContentEntity().getUuid()), entities.getContentEntity().getMimeType());
+                return new TypedFileReference(entities.getContentEntity());
             } else {
                 final RenditionEntity renditionEntity = entities.getRenditionEntitiesByMimeType().get(preferredMimeType);
                 if(renditionEntity != null) {
-                    return new TypedFileReference(FileStoreType.RENDITION, UUID.fromString(renditionEntity.getUuid()), renditionEntity.getMimeType());
+                    return new TypedFileReference(renditionEntity);
                 }
             }
         }
-        return new TypedFileReference(FileStoreType.CONTENT, UUID.fromString(entities.getContentEntity().getUuid()), entities.getContentEntity().getMimeType());
+        return new TypedFileReference(entities.getContentEntity());
     }
 
     private void onSuccess(UUID contentUuid, UUID transformedUuid, Set<String> outputMimeTypes) {
