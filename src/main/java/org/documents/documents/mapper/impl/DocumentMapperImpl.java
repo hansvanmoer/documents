@@ -7,6 +7,7 @@ import org.documents.documents.db.model.DocumentWithContentEntity;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.mapper.DocumentMapper;
 import org.documents.documents.model.DocumentAndContentEntities;
+import org.documents.documents.model.DocumentToIndex;
 import org.documents.documents.model.api.Document;
 import org.documents.documents.search.document.DocumentSearchDocument;
 import org.springframework.stereotype.Component;
@@ -20,10 +21,14 @@ public class DocumentMapperImpl implements DocumentMapper {
     private final TemporalHelper temporalHelper;
 
     @Override
-    public Document map(DocumentEntity documentEntity, ContentEntity contentEntity) {
+    public Document map(DocumentAndContentEntities entities) {
+        final DocumentEntity documentEntity = entities.documentEntity();
+        final ContentEntity contentEntity = entities.contentEntity();
         return new Document(
                 UUID.fromString(documentEntity.getUuid()),
                 temporalHelper.fromDatabaseTime(documentEntity.getCreated()),
+                temporalHelper.fromDatabaseTime(documentEntity.getModified()),
+                temporalHelper.fromDatabaseTime(documentEntity.getContentModified()),
                 contentEntity.getMimeType(),
                 documentEntity.getTitle()
         );
@@ -34,6 +39,8 @@ public class DocumentMapperImpl implements DocumentMapper {
         return new Document(
                 UUID.fromString(input.getUuid()),
                 temporalHelper.fromDatabaseTime(input.getCreated()),
+                temporalHelper.fromDatabaseTime(input.getModified()),
+                temporalHelper.fromDatabaseTime(input.getContentModified()),
                 input.getMimeType(),
                 input.getTitle()
         );
@@ -44,15 +51,17 @@ public class DocumentMapperImpl implements DocumentMapper {
         return new Document(
                 UUID.fromString(input.getUuid()),
                 input.getCreated(),
+                input.getModified(),
+                input.getContentModified(),
                 input.getMimeType(),
                 input.getTitle()
         );
     }
 
     @Override
-    public DocumentSearchDocument mapToDocumentSearchDocument(DocumentAndContentEntities input) {
-        final DocumentEntity documentEntity = input.getDocumentEntity();
-        final ContentEntity contentEntity = input.getContentEntity();
+    public DocumentSearchDocument mapToDocumentSearchDocument(DocumentToIndex input) {
+        final DocumentEntity documentEntity = input.documentEntity();
+        final ContentEntity contentEntity = input.contentEntity();
         final DocumentSearchDocument searchDocument = new DocumentSearchDocument();
         searchDocument.setId(documentEntity.getId());
         searchDocument.setUuid(documentEntity.getUuid());
@@ -60,7 +69,7 @@ public class DocumentMapperImpl implements DocumentMapper {
         searchDocument.setTitle(documentEntity.getTitle());
         searchDocument.setCreated(temporalHelper.fromDatabaseTime(documentEntity.getCreated()));
         searchDocument.setTitle(documentEntity.getTitle());
-        searchDocument.setContent(input.getContentAsText());
+        searchDocument.setContent(input.contentAsText());
         return searchDocument;
     }
 

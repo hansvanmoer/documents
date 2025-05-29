@@ -21,13 +21,19 @@ public class DocumentSearchDocument {
     @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
     private ZonedDateTime created;
 
+    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
+    private ZonedDateTime modified;
+
+    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
+    private ZonedDateTime contentModified;
+
+    @WriteOnlyProperty
+    @Field(type = FieldType.Text)
+    private String content;
+
     @Field(type = FieldType.Keyword)
     private String mimeType;
 
     @Field(type = FieldType.Text)
     private String title;
-
-    @WriteOnlyProperty
-    @Field(type = FieldType.Text)
-    private String content;
 }

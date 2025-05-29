@@ -14,6 +14,9 @@ public class DocumentEntity {
     private Long id;
     private String uuid;
     private LocalDateTime created;
+    private LocalDateTime modified;
+    @Column("content_modified")
+    private LocalDateTime contentModified;
     @Column("content_id")
     private Long contentId;
     @Column("content_index_status")

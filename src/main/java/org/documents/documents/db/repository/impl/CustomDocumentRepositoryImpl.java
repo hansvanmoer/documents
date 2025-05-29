@@ -22,11 +22,13 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
             "SELECT " +
             "d.id as id, " +
             "d.uuid as uuid, " +
-            "c.mime_type as mimeType, " +
-            "d.content_index_status as contentIndexStatus, " +
             "d.created as created, " +
-            "d.title as title " +
-            "FROM document d, content c " +
+            "d.modified as modified, " +
+            "d.content_modified as contentModified, " +
+            "c.mime_type as mimeType, " +
+            "d.title as title, " +
+            "FROM document d, content c, " +
+            "d.content_index_status as contentIndexStatus " +
             "WHERE " +
             "d.content_id = c.id";
 
@@ -61,6 +63,8 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
         entity.setUuid((String)row.get("uuid"));
         entity.setMimeType((String)row.get("mimeType"));
         entity.setCreated((LocalDateTime) row.get("created"));
+        entity.setModified((LocalDateTime) row.get("modified"));
+        entity.setContentModified((LocalDateTime) row.get("contentModified"));
         entity.setContentIndexStatus(ContentIndexStatus.valueOf((String)row.get("contentIndexStatus")));
         entity.setTitle((String)row.get("title"));
         return entity;

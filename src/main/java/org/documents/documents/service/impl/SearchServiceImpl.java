@@ -1,7 +1,6 @@
 package org.documents.documents.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.db.entity.ContentIndexStatus;
@@ -22,7 +21,6 @@ public class SearchServiceImpl implements SearchService {
     public Flux<UUID> indexWaitingDocumentsWithTextRenditions() {
         return documentRepository.findByContentIndexStatus(ContentIndexStatus.WAITING)
                 .flatMap(indexHelper::indexDocumentIfRenditionExists)
-                .map(DocumentEntity::getUuid)
-                .map(UUID::fromString);
+                .map(entities -> UUID.fromString(entities.documentEntity().getUuid()));
     }
 }

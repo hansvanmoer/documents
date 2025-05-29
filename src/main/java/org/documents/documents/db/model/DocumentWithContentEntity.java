@@ -9,8 +9,10 @@ import java.time.LocalDateTime;
 public class DocumentWithContentEntity {
     private Long id;
     private String uuid;
-    private String mimeType;
-    private ContentIndexStatus contentIndexStatus;
     private LocalDateTime created;
+    private LocalDateTime modified;
+    private LocalDateTime contentModified;
+    private String mimeType;
     private String title;
+    private ContentIndexStatus contentIndexStatus;
 }

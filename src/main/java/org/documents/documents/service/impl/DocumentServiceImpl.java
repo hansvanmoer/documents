@@ -10,6 +10,8 @@ import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.helper.UuidHelper;
 import org.documents.documents.mapper.DocumentMapper;
 import org.documents.documents.db.entity.ContentIndexStatus;
+import org.documents.documents.model.DocumentAndContentEntities;
+import org.documents.documents.model.DocumentUpdate;
 import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.model.api.Document;
 import org.documents.documents.db.repository.ContentRepository;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -63,6 +66,36 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    public Mono<Document> update(UUID uuid, DocumentUpdate update) {
+        return documentRepository.findByUuid(uuid.toString())
+                .flatMap(documentEntity ->
+                        Mono.justOrEmpty(update.getContentUuid().toString())
+                                .flatMap(contentRepository::findByUuid)
+                                .switchIfEmpty(contentRepository.findById(documentEntity.getId()))
+                                .map(contentEntity -> new DocumentAndContentEntities(documentEntity, contentEntity))
+                )
+                .flatMap(entities -> updateEntity(entities, update))
+                .map(documentMapper::map);
+    }
+
+    private Mono<DocumentAndContentEntities> updateEntity(DocumentAndContentEntities entities, DocumentUpdate update) {
+        final boolean contentChanged = entities.contentHasChanged();
+        final LocalDateTime now = temporalHelper.toDatabaseTime(temporalHelper.now());
+        if(update.getTitle() != null) {
+            entities.documentEntity().setTitle(update.getTitle());
+        }
+        if(contentChanged) {
+            entities.documentEntity().setContentId(entities.contentEntity().getId());
+            entities.documentEntity().setContentModified(now);
+        }
+        entities.documentEntity().setModified(now);
+        return documentRepository.save(entities.documentEntity())
+                .map(entities::withDocumentEntity)
+                .flatMap(contentChanged ? indexHelper::reindexDocument : indexHelper::reindexDocumentMetadata);
+    }
+
+
+    @Override
     public Mono<Void> delete(UUID uuid) {
         return documentRepository.findByUuid(uuid.toString()).flatMap(entity ->
             documentRepository.delete(entity).then(documentSearchRepository.deleteById(entity.getId()))
@@ -79,8 +112,8 @@ public class DocumentServiceImpl implements DocumentService {
         entity.setContentIndexStatus(isIndexSupported(contentEntity) ? ContentIndexStatus.WAITING : ContentIndexStatus.UNSUPPORTED);
         entity.setTitle(title);
         return documentRepository.save(entity)
-                .flatMap(d -> indexHelper.indexDocument(d, contentEntity))
-                .map(d -> documentMapper.map(d, contentEntity));
+                .flatMap(d -> indexHelper.indexDocument(new DocumentAndContentEntities(d, contentEntity)))
+                .map(documentMapper::map);
     }
 
     private boolean isIndexSupported(ContentEntity contentEntity) {

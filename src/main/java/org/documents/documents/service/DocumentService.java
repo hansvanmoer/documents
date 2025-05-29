@@ -1,5 +1,6 @@
 package org.documents.documents.service;
 
+import org.documents.documents.model.DocumentUpdate;
 import org.documents.documents.model.api.Document;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,8 @@ public interface DocumentService {
     Flux<Document> list(Pageable pageable);
 
     Flux<Document> search(Pageable pageable, String term);
+
+    Mono<Document> update(UUID uuid, DocumentUpdate update);
 
     Mono<Void> delete(UUID uuid);
 }

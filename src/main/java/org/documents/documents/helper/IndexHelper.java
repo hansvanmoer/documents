@@ -1,16 +1,18 @@
 package org.documents.documents.helper;
 
-import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.entity.DocumentEntity;
+import org.documents.documents.model.DocumentAndContentEntities;
 import reactor.core.publisher.Mono;
 
 public interface IndexHelper {
 
-    Mono<DocumentEntity> indexDocument(DocumentEntity document, ContentEntity content);
+    Mono<DocumentAndContentEntities> indexDocument(DocumentAndContentEntities entities);
 
-    Mono<DocumentEntity> indexDocumentIfRenditionExists(DocumentEntity document, ContentEntity content);
+    Mono<DocumentAndContentEntities> indexDocumentIfRenditionExists(DocumentEntity documentEntity);
 
-    Mono<DocumentEntity> indexDocument(DocumentEntity document);
+    Mono<DocumentAndContentEntities> indexDocumentIfRenditionExists(DocumentAndContentEntities entities);
 
-    Mono<DocumentEntity> indexDocumentIfRenditionExists(DocumentEntity document);
+    Mono<DocumentAndContentEntities> reindexDocument(DocumentAndContentEntities entities);
+
+    Mono<DocumentAndContentEntities> reindexDocumentMetadata(DocumentAndContentEntities entities);
 }
