@@ -15,4 +15,6 @@ public interface IndexHelper {
     Mono<DocumentAndContentEntities> reindexDocument(DocumentAndContentEntities entities);
 
     Mono<DocumentAndContentEntities> reindexDocumentMetadata(DocumentAndContentEntities entities);
+
+    boolean canIndex(String mimeType);
 }

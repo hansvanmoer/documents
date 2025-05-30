@@ -15,6 +15,8 @@ public record Document(
         ZonedDateTime modified,
         @Schema(description = "The timestamp on which the document content was modified")
         ZonedDateTime contentModified,
+        @Schema(description = "The content associated with the document")
+        UUID contentUuid,
         @Schema(description = "The mime type of the document")
         String mimeType,
         @Schema(description = "The document title")

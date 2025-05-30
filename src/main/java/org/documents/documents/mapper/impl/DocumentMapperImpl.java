@@ -29,6 +29,7 @@ public class DocumentMapperImpl implements DocumentMapper {
                 temporalHelper.fromDatabaseTime(documentEntity.getCreated()),
                 temporalHelper.fromDatabaseTime(documentEntity.getModified()),
                 temporalHelper.fromDatabaseTime(documentEntity.getContentModified()),
+                UUID.fromString(contentEntity.getUuid()),
                 contentEntity.getMimeType(),
                 documentEntity.getTitle()
         );
@@ -41,6 +42,7 @@ public class DocumentMapperImpl implements DocumentMapper {
                 temporalHelper.fromDatabaseTime(input.getCreated()),
                 temporalHelper.fromDatabaseTime(input.getModified()),
                 temporalHelper.fromDatabaseTime(input.getContentModified()),
+                UUID.fromString(input.getUuid()),
                 input.getMimeType(),
                 input.getTitle()
         );
@@ -53,6 +55,7 @@ public class DocumentMapperImpl implements DocumentMapper {
                 input.getCreated(),
                 input.getModified(),
                 input.getContentModified(),
+                UUID.fromString(input.getUuid()),
                 input.getMimeType(),
                 input.getTitle()
         );

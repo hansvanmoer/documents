@@ -64,6 +64,11 @@ public class IndexHelperImpl implements IndexHelper {
         return reindexMetadata(entities.toDocumentToIndex()).map(DocumentToIndex::toDocumentAndContentEntities);
     }
 
+    @Override
+    public boolean canIndex(String mimeType) {
+        return renditionHelper.isSupported(mimeType, MediaType.TEXT_PLAIN_VALUE);
+    }
+
     private Mono<DocumentAndContentEntities> indexOrReindexDocument(Mono<FileReference> fileReferenceProducer, DocumentToIndex entities) {
         return fileReferenceProducer.map(fileStoreRegistry::createFileProxy)
                 .flatMap(file -> fileHelper.readToString(file, StandardCharsets.UTF_8))

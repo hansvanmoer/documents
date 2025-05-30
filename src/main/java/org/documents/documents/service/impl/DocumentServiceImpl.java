@@ -5,7 +5,6 @@ import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.repository.CustomDocumentRepository;
 import org.documents.documents.helper.IndexHelper;
-import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.helper.UuidHelper;
 import org.documents.documents.mapper.DocumentMapper;
@@ -19,7 +18,6 @@ import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.search.repository.DocumentSearchRepository;
 import org.documents.documents.service.DocumentService;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,7 +36,6 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final DocumentSearchRepository documentSearchRepository;
     private final IndexHelper indexHelper;
-    private final RenditionHelper renditionHelper;
     private final TemporalHelper temporalHelper;
     private final UuidHelper uuidHelper;
 
@@ -106,17 +103,17 @@ public class DocumentServiceImpl implements DocumentService {
         final ZonedDateTime now = temporalHelper.now();
         final UUID uuid = uuidHelper.createUuid();
         final DocumentEntity entity = new DocumentEntity();
-        entity.setUuid(uuid.toString());
-        entity.setCreated(temporalHelper.toDatabaseTime(now));
+        final LocalDateTime localNow = temporalHelper.toDatabaseTime(now);
+        entity.setContentModified(localNow);
         entity.setContentId(contentEntity.getId());
-        entity.setContentIndexStatus(isIndexSupported(contentEntity) ? ContentIndexStatus.WAITING : ContentIndexStatus.UNSUPPORTED);
+        entity.setCreated(localNow);
+        entity.setModified(localNow);
         entity.setTitle(title);
+        entity.setUuid(uuid.toString());
+
+        entity.setContentIndexStatus(indexHelper.canIndex(contentEntity.getMimeType()) ? ContentIndexStatus.WAITING : ContentIndexStatus.UNSUPPORTED);
         return documentRepository.save(entity)
                 .flatMap(d -> indexHelper.indexDocument(new DocumentAndContentEntities(d, contentEntity)))
                 .map(documentMapper::map);
-    }
-
-    private boolean isIndexSupported(ContentEntity contentEntity) {
-        return renditionHelper.isSupported(contentEntity.getMimeType(), MediaType.TEXT_PLAIN_VALUE);
     }
 }
