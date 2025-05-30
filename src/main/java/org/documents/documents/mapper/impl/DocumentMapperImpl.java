@@ -71,6 +71,8 @@ public class DocumentMapperImpl implements DocumentMapper {
         searchDocument.setMimeType(contentEntity.getMimeType());
         searchDocument.setTitle(documentEntity.getTitle());
         searchDocument.setCreated(temporalHelper.fromDatabaseTime(documentEntity.getCreated()));
+        searchDocument.setModified(temporalHelper.fromDatabaseTime(documentEntity.getModified()));
+        searchDocument.setContentModified(temporalHelper.fromDatabaseTime(documentEntity.getContentModified()));
         searchDocument.setTitle(documentEntity.getTitle());
         searchDocument.setContent(input.contentAsText());
         return searchDocument;

@@ -20,4 +20,8 @@ public class ContentAndRenditionEntities {
         renditionEntities.forEach(renditionEntity -> map.put(renditionEntity.getMimeType(), renditionEntity));
         this.renditionEntitiesByMimeType = Collections.unmodifiableMap(map);
     }
+
+    public boolean containsRendition(String mimeType) {
+        return renditionEntitiesByMimeType.containsKey(mimeType);
+    }
 }

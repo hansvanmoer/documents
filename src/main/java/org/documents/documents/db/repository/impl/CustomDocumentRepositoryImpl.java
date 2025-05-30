@@ -27,8 +27,8 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
             "d.content_modified as contentModified, " +
             "c.mime_type as mimeType, " +
             "d.title as title, " +
-            "FROM document d, content c, " +
             "d.content_index_status as contentIndexStatus " +
+            "FROM document d, content c " +
             "WHERE " +
             "d.content_id = c.id";
 

@@ -3,7 +3,6 @@ package org.documents.documents.helper.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.documents.documents.db.entity.RenditionEntity;
-import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.file.*;
 import org.documents.documents.helper.*;
 import org.documents.documents.model.ContentAndRenditionEntities;
@@ -12,7 +11,6 @@ import org.documents.documents.transform.Transform;
 import org.documents.documents.transform.TransformRegistry;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,7 +24,6 @@ public class RunTransformHelperImpl implements RunTransformHelper {
     private final RenditionHelper renditionHelper;
     private final TransformFileStore transformFileStore;
     private final TransformRegistry transformRegistry;
-    private final ContentRepository contentRepository;
 
     @Override
     public void runTransform(UUID contentUuid, String targetMimeType) {
@@ -70,15 +67,22 @@ public class RunTransformHelperImpl implements RunTransformHelper {
     }
 
     private void onSuccess(UUID contentUuid, UUID transformedUuid, Set<String> outputMimeTypes) {
-        final List<RenditionEntity> renditions = Objects.requireNonNull(contentRepository.findByUuid(contentUuid.toString())
-                .flatMapMany(contentEntity ->
-                        Flux.fromIterable(outputMimeTypes).flatMap(outputMimeType -> renditionHelper.storeRendition(contentEntity, outputMimeType, transformedUuid))
-                ).collect(Collectors.toList())
-                .switchIfEmpty(Mono.just(Collections.emptyList()))
-                .block());
+        final List<RenditionEntity> renditions = Objects.requireNonNull(storeRenditions(contentUuid, transformedUuid, outputMimeTypes)
+                .collect(Collectors.toList())
+                .block()
+        );
         for(RenditionEntity renditionEntity : renditions) {
             log.debug("Rendition {} for mime type {} of content UUID {} successfully stored", renditionEntity.getUuid(), renditionEntity.getMimeType(), contentUuid);
         }
+    }
+
+    private Flux<RenditionEntity> storeRenditions(UUID contentUuid, UUID transformedUuid, Set<String> outputMimeTypes) {
+        return renditionHelper.getContentAndRenditions(contentUuid)
+                .flatMapMany(entities ->
+                        Flux.fromIterable(outputMimeTypes)
+                                .filter(outputMimeType -> !entities.containsRendition(outputMimeType))
+                                .flatMap(outputMimeType -> renditionHelper.storeRendition(entities.getContentEntity(), outputMimeType, transformedUuid))
+                );
     }
 
     private void onFailure(UUID uuid, String message) {
