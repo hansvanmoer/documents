@@ -8,6 +8,7 @@ import org.documents.documents.model.api.CreateRenditionRequest;
 import org.documents.documents.model.api.CreateRenditionResponse;
 import org.documents.documents.model.api.Rendition;
 import org.documents.documents.service.RenditionService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class RenditionController {
             description = "Lists all renditions",
             summary = "Lists all renditions, optionally filtered by mime type"
     )
-    public Flux<Rendition> list(
+    public Mono<Page<Rendition>> list(
             @Parameter(description = "Page size")
             @RequestParam(name = "page-size", required = false, defaultValue = "#{apiSettings.defaultPageSize}")
             Integer pageSize,

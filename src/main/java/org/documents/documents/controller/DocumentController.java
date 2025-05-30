@@ -7,6 +7,7 @@ import org.documents.documents.helper.ControllerHelper;
 import org.documents.documents.model.DocumentUpdate;
 import org.documents.documents.model.api.*;
 import org.documents.documents.service.DocumentService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -39,7 +40,7 @@ public class DocumentController {
             summary = "List documents"
     )
     @GetMapping(ApiConstants.DOCUMENTS_PATH)
-    public Flux<Document> list(
+    public Mono<Page<Document>> list(
             @Parameter(description = "Page size")
             @RequestParam(name = "page-size", required = false, defaultValue = "#{apiSettings.defaultPageSize}")
             Integer pageSize,

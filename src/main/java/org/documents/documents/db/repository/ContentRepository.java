@@ -7,4 +7,5 @@ import reactor.core.publisher.Mono;
 public interface ContentRepository extends ReactiveCrudRepository<ContentEntity, Long> {
 
     Mono<ContentEntity> findByUuid(String uuid);
+
 }

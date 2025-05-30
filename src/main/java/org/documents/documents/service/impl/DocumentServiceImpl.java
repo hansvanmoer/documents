@@ -17,6 +17,8 @@ import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.search.repository.DocumentSearchRepository;
 import org.documents.documents.service.DocumentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -52,8 +54,12 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public Flux<Document> list(Pageable pageable) {
-        return customDocumentRepository.find(pageable).map(documentMapper::map);
+    public Mono<Page<Document>> list(Pageable pageable) {
+        return customDocumentRepository.find(pageable)
+                .map(documentMapper::map)
+                .collectList()
+                .zipWith(documentRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageable, t.getT2()));
     }
 
     @Override

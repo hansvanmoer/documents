@@ -10,6 +10,8 @@ import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.RenditionMapper;
 import org.documents.documents.model.api.Rendition;
 import org.documents.documents.service.RenditionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -37,16 +39,22 @@ public class RenditionServiceImpl implements RenditionService {
     }
 
     @Override
-    public Flux<Rendition> listByMimeType(String mimeType, Pageable pageable) {
+    public Mono<Page<Rendition>> listByMimeType(String mimeType, Pageable pageable) {
         return renditionRepository.findByMimeType(mimeType, pageable)
-                .map(renditionMapper::map);
+                .map(renditionMapper::map)
+                .collectList()
+                .zipWith(renditionRepository.countByMimeType(mimeType))
+                .map(t -> new PageImpl<>(t.getT1(), pageable, t.getT2()));
     }
 
 
     @Override
-    public Flux<Rendition> list(Pageable pageable) {
+    public Mono<Page<Rendition>> list(Pageable pageable) {
         return customRenditionRepository.findAll(pageable)
-                .map(renditionMapper::map);
+                .map(renditionMapper::map)
+                .collectList()
+                .zipWith(renditionRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageable, t.getT2()));
     }
 
     @Override

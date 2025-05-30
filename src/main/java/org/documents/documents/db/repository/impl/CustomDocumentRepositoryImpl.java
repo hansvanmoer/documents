@@ -1,6 +1,8 @@
 package org.documents.documents.db.repository.impl;
 
 import lombok.AllArgsConstructor;
+import org.documents.documents.db.mapper.RowMapper;
+import org.documents.documents.db.mapper.impl.RowMapperImpl;
 import org.documents.documents.db.model.DocumentWithContentEntity;
 import org.documents.documents.db.repository.CustomDocumentRepository;
 import org.documents.documents.db.entity.ContentIndexStatus;
@@ -10,8 +12,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -36,6 +36,17 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
 
     private static final String FIND_BY_UUID_SQL = BASE_QUERY + " AND d.uuid = :uuid";
 
+    private final RowMapper<DocumentWithContentEntity> documentWithContentEntityRowMapper = RowMapperImpl.builder(DocumentWithContentEntity::new)
+            .property("id", DocumentWithContentEntity::setId)
+            .property("uuid", DocumentWithContentEntity::setUuid)
+            .property("mimeType", DocumentWithContentEntity::setMimeType)
+            .property("created", DocumentWithContentEntity::setCreated)
+            .property("modified", DocumentWithContentEntity::setModified)
+            .property("contentModified", DocumentWithContentEntity::setContentModified)
+            .property("contentIndexStatus", DocumentWithContentEntity::setContentIndexStatus, ContentIndexStatus::valueOf)
+            .property("title", DocumentWithContentEntity::setTitle)
+            .build();
+
     private final DatabaseClient databaseClient;
 
     @Override
@@ -44,7 +55,7 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
                 .bind("uuid", uuid.toString())
                 .fetch()
                 .one()
-                .map(this::map);
+                .map(documentWithContentEntityRowMapper::map);
     }
 
     @Override
@@ -54,19 +65,6 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
                 .bind("limit",pageable.getPageSize())
                 .fetch()
                 .all()
-                .map(this::map);
-    }
-
-    private DocumentWithContentEntity map(Map<String, Object> row) {
-        final DocumentWithContentEntity entity = new DocumentWithContentEntity();
-        entity.setId((Long)row.get("id"));
-        entity.setUuid((String)row.get("uuid"));
-        entity.setMimeType((String)row.get("mimeType"));
-        entity.setCreated((LocalDateTime) row.get("created"));
-        entity.setModified((LocalDateTime) row.get("modified"));
-        entity.setContentModified((LocalDateTime) row.get("contentModified"));
-        entity.setContentIndexStatus(ContentIndexStatus.valueOf((String)row.get("contentIndexStatus")));
-        entity.setTitle((String)row.get("title"));
-        return entity;
+                .map(documentWithContentEntityRowMapper::map);
     }
 }

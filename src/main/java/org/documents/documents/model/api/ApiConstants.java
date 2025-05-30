@@ -11,6 +11,11 @@ public interface ApiConstants {
     String MIME_TYPE_PARAMETER = "mime-type";
 
     /**
+     * The content UUID
+     */
+    String CONTENT_UUID_PATH_VARIABLE = "content-uuid";
+
+    /**
      * The document UUID
      */
     String DOCUMENT_UUID_PATH_VARIABLE = "document-uuid";
@@ -29,6 +34,11 @@ public interface ApiConstants {
      * The content path
      */
     String CONTENT_PATH = API_BASE_PATH + "/content";
+
+    /**
+     * The content by UUID path
+     */
+    String CONTENT_BY_UUID_PATH = API_BASE_PATH + "/content-by-uuid/{content-uuid}";
 
     /**
      * Documents path

@@ -1,6 +1,7 @@
 package org.documents.documents.service;
 
 import org.documents.documents.model.api.Rendition;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -11,11 +12,11 @@ public interface RenditionService {
 
     Mono<Rendition> getOrRequest(UUID documentUuid, String mimeType);
 
-    Flux<Rendition> list(Pageable pageable);
+    Mono<Page<Rendition>> list(Pageable pageable);
 
     Flux<Rendition> listByDocumentUuid(UUID documentUuid);
 
-    Flux<Rendition> listByMimeType(String mimeType, Pageable pageable);
+    Mono<Page<Rendition>> listByMimeType(String mimeType, Pageable pageable);
 
     Mono<Rendition> get(UUID renditionUuid);
 

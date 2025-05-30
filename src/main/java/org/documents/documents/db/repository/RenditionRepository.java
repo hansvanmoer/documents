@@ -14,7 +14,10 @@ public interface RenditionRepository extends ReactiveCrudRepository<RenditionEnt
 
     Flux<RenditionEntity> findByMimeType(String mimeType, Pageable pageable);
 
+    Mono<Long> countByMimeType(String mimeType);
+
     Mono<RenditionEntity> findByUuid(String uuid);
 
     Mono<Void> deleteByUuid(String uuid);
+
 }
