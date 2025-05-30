@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.repository.CustomDocumentRepository;
+import org.documents.documents.helper.EventHelper;
 import org.documents.documents.helper.IndexHelper;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.helper.UuidHelper;
@@ -37,6 +38,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentMapper documentMapper;
     private final DocumentRepository documentRepository;
     private final DocumentSearchRepository documentSearchRepository;
+    private final EventHelper eventHelper;
     private final IndexHelper indexHelper;
     private final TemporalHelper temporalHelper;
     private final UuidHelper uuidHelper;
@@ -45,7 +47,8 @@ public class DocumentServiceImpl implements DocumentService {
     public Mono<Document> create(String title, UUID contentUuid) {
         return contentRepository.findByUuid(contentUuid.toString())
             .switchIfEmpty(Mono.error(new NotFoundException("content for new document not found", contentUuid)))
-            .flatMap(content -> create(title, content));
+            .flatMap(content -> create(title, content))
+                .flatMap(document -> eventHelper.notifyDocumentCreated(document).thenReturn(document));
     }
 
     @Override
@@ -78,7 +81,8 @@ public class DocumentServiceImpl implements DocumentService {
                                 .map(contentEntity -> new DocumentAndContentEntities(documentEntity, contentEntity))
                 )
                 .flatMap(entities -> updateEntity(entities, update))
-                .map(documentMapper::map);
+                .map(documentMapper::map)
+                .flatMap(document -> eventHelper.notifyDocumentUpdated(document).thenReturn(document));
     }
 
     private Mono<DocumentAndContentEntities> updateEntity(DocumentAndContentEntities entities, DocumentUpdate update) {
@@ -102,7 +106,7 @@ public class DocumentServiceImpl implements DocumentService {
     public Mono<Void> delete(UUID uuid) {
         return documentRepository.findByUuid(uuid.toString()).flatMap(entity ->
             documentRepository.delete(entity).then(documentSearchRepository.deleteById(entity.getId()))
-        );
+        ).then(eventHelper.notifyDocumentDeleted(uuid));
     }
 
     private Mono<Document> create(String title, ContentEntity contentEntity) {

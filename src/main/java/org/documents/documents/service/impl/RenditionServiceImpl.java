@@ -6,6 +6,7 @@ import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.CustomRenditionRepository;
 import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.db.repository.RenditionRepository;
+import org.documents.documents.helper.EventHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.RenditionMapper;
 import org.documents.documents.model.api.Rendition;
@@ -26,6 +27,7 @@ public class RenditionServiceImpl implements RenditionService {
     private final ContentRepository contentRepository;
     private final CustomRenditionRepository customRenditionRepository;
     private final DocumentRepository documentRepository;
+    private final EventHelper eventHelper;
     private final RenditionHelper renditionHelper;
     private final RenditionMapper renditionMapper;
     private final RenditionRepository renditionRepository;
@@ -65,7 +67,7 @@ public class RenditionServiceImpl implements RenditionService {
 
     @Override
     public Mono<Void> delete(UUID rendtionUuid) {
-        return renditionRepository.deleteByUuid(rendtionUuid.toString());
+        return renditionRepository.deleteByUuid(rendtionUuid.toString()).then(eventHelper.notifyRenditionDeleted(rendtionUuid));
     }
 
     @Override

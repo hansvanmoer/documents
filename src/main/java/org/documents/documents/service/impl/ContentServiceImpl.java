@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.documents.documents.db.entity.ContentEntity;
 import org.documents.documents.db.repository.CustomContentRepository;
 import org.documents.documents.file.FileStore;
+import org.documents.documents.helper.EventHelper;
 import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.mapper.ContentMapper;
 import org.documents.documents.model.api.Content;
@@ -30,6 +31,7 @@ public class ContentServiceImpl implements ContentService {
     private final ContentMapper contentMapper;
     private final ContentRepository contentRepository;
     private final CustomContentRepository customContentRepository;
+    private final EventHelper eventHelper;
     private final TemporalHelper temporalHelper;
 
     public ContentServiceImpl(
@@ -37,12 +39,14 @@ public class ContentServiceImpl implements ContentService {
             ContentMapper contentMapper,
             ContentRepository contentRepository,
             CustomContentRepository customContentRepository,
+            EventHelper eventHelper,
             TemporalHelper temporalHelper
     ) {
         this.fileStore = fileStore;
         this.contentMapper = contentMapper;
         this.contentRepository = contentRepository;
         this.customContentRepository = customContentRepository;
+        this.eventHelper = eventHelper;
         this.temporalHelper = temporalHelper;
     }
 
@@ -50,7 +54,8 @@ public class ContentServiceImpl implements ContentService {
     public Mono<Content> upload(MediaType mimeType, Flux<DataBuffer> content) {
         return fileStore.create(content)
                 .flatMap(uuid -> storeEntity(uuid, mimeType))
-                .map(contentMapper::map);
+                .map(contentMapper::map)
+                .flatMap(c -> eventHelper.notifyContentCreated(c).thenReturn(c));
     }
 
     @Override

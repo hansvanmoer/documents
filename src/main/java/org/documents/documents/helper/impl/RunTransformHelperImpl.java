@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.documents.documents.db.entity.RenditionEntity;
 import org.documents.documents.file.*;
 import org.documents.documents.helper.*;
+import org.documents.documents.mapper.RenditionMapper;
 import org.documents.documents.model.ContentAndRenditionEntities;
 import org.documents.documents.model.transform.TransformResult;
 import org.documents.documents.transform.Transform;
@@ -20,8 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RunTransformHelperImpl implements RunTransformHelper {
 
+    private final EventHelper eventHelper;
     private final FileStoreRegistry fileStoreRegistry;
     private final RenditionHelper renditionHelper;
+    private final RenditionMapper renditionMapper;
     private final TransformFileStore transformFileStore;
     private final TransformRegistry transformRegistry;
 
@@ -82,6 +85,7 @@ public class RunTransformHelperImpl implements RunTransformHelper {
                         Flux.fromIterable(outputMimeTypes)
                                 .filter(outputMimeType -> !entities.containsRendition(outputMimeType))
                                 .flatMap(outputMimeType -> renditionHelper.storeRendition(entities.getContentEntity(), outputMimeType, transformedUuid))
+                                .flatMap(entity -> eventHelper.notifyRenditionCreated(renditionMapper.map(entity)).thenReturn(entity))
                 );
     }
 
