@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(value = {
         FileSettings.class,
-        MessageSettings.class,
         TemporalSettings.class,
         TransformSettings.class
 })
