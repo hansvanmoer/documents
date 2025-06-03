@@ -17,8 +17,12 @@ public class PreviewListener {
     private final RequestTransformHelper requestTransformHelper;
 
     @RabbitListener(queues = MessageConstants.PREVIEW_QUEUE_NAME)
-    public void onDocumentDeletedEvent(DocumentCreatedEvent documentCreatedEvent) {
-        log.debug("Preview requested: {}", documentCreatedEvent.document().uuid());
-        requestTransformHelper.requestTransform(documentCreatedEvent.document().contentUuid(), MediaType.IMAGE_PNG_VALUE);
+    public void onDocumentCreatedEvent(DocumentCreatedEvent documentCreatedEvent) {
+        try {
+            log.debug("Preview requested: {}", documentCreatedEvent.document().uuid());
+            requestTransformHelper.requestTransform(documentCreatedEvent.document().contentUuid(), MediaType.IMAGE_PNG_VALUE);
+        } catch(Exception ex) {
+            log.error("could not request preview", ex);
+        }
     }
 }

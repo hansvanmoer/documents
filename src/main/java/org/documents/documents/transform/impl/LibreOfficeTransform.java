@@ -23,10 +23,11 @@ import java.util.concurrent.TimeUnit;
 public class LibreOfficeTransform implements Transform {
 
     private static final MediaType WORD_2007_MEDIA_TYPE = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    private static final MediaType POWER_POINT_2007_MEDIA_TYPE = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.presentationml.presentation");
     private static final List<String> ARGS = Arrays.asList("--headless", "--convert-to");
     private static final Map<String, String> OUTPUT_FORMATS = Collections.unmodifiableMap(new HashMap<>() {{
         put(MediaType.TEXT_PLAIN_VALUE, "txt:Text");
-        put(MediaType.APPLICATION_PDF_VALUE, "pdf:writer_pdf_Export");
+        put(MediaType.APPLICATION_PDF_VALUE, "pdf");
     }});
 
     private final TransformFileStore transformFileStore;
@@ -65,7 +66,8 @@ public class LibreOfficeTransform implements Transform {
     public Set<TransformType> getSupportedTransformTypes() {
         return Set.of(
                 new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.TEXT_PLAIN.toString()),
-                new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.APPLICATION_PDF_VALUE)
+                new TransformType(WORD_2007_MEDIA_TYPE.toString(), MediaType.APPLICATION_PDF_VALUE),
+                new TransformType(POWER_POINT_2007_MEDIA_TYPE.toString(), MediaType.APPLICATION_PDF_VALUE)
         );
     }
 

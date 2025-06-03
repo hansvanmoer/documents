@@ -22,7 +22,8 @@ public class TransformConfig {
                         libreOfficeTransform,
                         pdfBoxRendererTransform,
                         pdfBoxTextStripperTransform,
-                        new CompositeTransform(libreOfficeTransform, MediaType.APPLICATION_PDF_VALUE, pdfBoxRendererTransform)
+                        new CompositeTransform(libreOfficeTransform, MediaType.APPLICATION_PDF_VALUE, pdfBoxRendererTransform),
+                        new CompositeTransform(libreOfficeTransform, MediaType.APPLICATION_PDF_VALUE, pdfBoxTextStripperTransform)
                 )
         );
     }
