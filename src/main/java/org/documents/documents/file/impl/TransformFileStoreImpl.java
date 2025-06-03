@@ -46,7 +46,7 @@ public class TransformFileStoreImpl implements TransformFileStore {
         try {
             Files.copy(path, destPath);
         } catch (IOException e) {
-            throw new InternalServerErrorException(ErrorCode.FILE_COPY_FAILED, e, "file copy to transform store failed");
+            throw new InternalServerErrorException(ErrorCode.FILE_COPY_FAILED, e, path, destPath);
         }
         return uuid;
     }
@@ -57,7 +57,7 @@ public class TransformFileStoreImpl implements TransformFileStore {
         try {
             Files.deleteIfExists(path);
         } catch (IOException e) {
-            throw new InternalServerErrorException(ErrorCode.FILE_DELETE_FAILED, e, "file delete at transform store failed");
+            throw new InternalServerErrorException(ErrorCode.FILE_DELETE_FAILED, e, path);
         }
     }
 

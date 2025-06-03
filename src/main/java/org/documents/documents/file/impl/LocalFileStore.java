@@ -36,7 +36,7 @@ public class LocalFileStore implements FileStore {
             Files.createDirectories(destPath.getParent());
             Files.copy(path, destPath);
         } catch(IOException e) {
-            throw new InternalServerErrorException(ErrorCode.FILE_COPY_FAILED, e, "could not copy file %s from path %s", uuid, path);
+            throw new InternalServerErrorException(ErrorCode.FILE_COPY_FAILED, e, uuid, path);
         }
         return uuid;
     }

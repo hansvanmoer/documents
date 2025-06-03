@@ -10,6 +10,7 @@ import org.documents.documents.mapper.DocumentMapper;
 import org.documents.documents.db.entity.ContentIndexStatus;
 import org.documents.documents.model.DocumentAndContentEntities;
 import org.documents.documents.model.DocumentUpdate;
+import org.documents.documents.model.api.Content;
 import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.model.api.Document;
 import org.documents.documents.db.repository.ContentRepository;
@@ -48,7 +49,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Mono<Document> create(String title, UUID contentUuid) {
         return contentRepository.findByUuid(contentUuid.toString())
-            .switchIfEmpty(Mono.error(new NotFoundException("content for new document not found", contentUuid)))
+            .switchIfEmpty(Mono.error(new NotFoundException(Content.class, contentUuid)))
             .flatMap(content -> create(title, content))
                 .flatMap(document -> eventHelper.notifyDocumentCreated(document).thenReturn(document));
     }

@@ -1,6 +1,7 @@
 package org.documents.documents.db.mapper.impl;
 
 import lombok.AllArgsConstructor;
+import org.documents.documents.db.mapper.PropertyConversionException;
 import org.documents.documents.db.mapper.PropertyMapper;
 import org.documents.documents.db.mapper.ValueMapper;
 import org.documents.documents.model.exception.ErrorCode;
@@ -18,8 +19,12 @@ public class PropertyMappingImpl<T, U> implements PropertyMapper<T> {
     public void map(T entity, Map<String, ?> row) {
         final Object value = row.get(name);
         if(value == null) {
-            throw new InternalServerErrorException(ErrorCode.DATABASE_MAPPING_FAILED, "required property %s not found", name);
+            throw new InternalServerErrorException(ErrorCode.DATABASE_VALUE_NOT_FOUND, name);
         }
-        setter.accept(entity, valueMapper.convert(value));
+        try {
+            setter.accept(entity, valueMapper.convert(value));
+        } catch(PropertyConversionException e) {
+            throw new InternalServerErrorException(ErrorCode.DATABASE_VALUE_CONVERSION_FAILED, name);
+        }
     }
 }
