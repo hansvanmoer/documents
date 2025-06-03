@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import org.documents.documents.helper.ControllerHelper;
 import org.documents.documents.model.api.ApiConstants;
 import org.documents.documents.model.api.Content;
+import org.documents.documents.model.exception.ErrorConstants;
+import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.service.ContentService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.domain.Page;
@@ -75,7 +77,7 @@ public class ContentController {
             @PathVariable(ApiConstants.CONTENT_UUID_PATH_VARIABLE)
             UUID contentUuid
     ) {
-        return contentService.get(contentUuid);
+        return contentService.get(contentUuid).switchIfEmpty(Mono.error(new NotFoundException("content not found: %s", contentUuid)));
     }
 
     @Operation(

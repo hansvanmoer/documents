@@ -1,5 +1,8 @@
 package org.documents.documents.model.exception;
 
+import lombok.Getter;
+
+@Getter
 public class ApiException extends RuntimeException {
     private final ErrorCode errorCode;
     private final Object[] args;
