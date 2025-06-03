@@ -6,6 +6,8 @@ import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.CustomRenditionRepository;
 import org.documents.documents.db.repository.DocumentRepository;
 import org.documents.documents.db.repository.RenditionRepository;
+import org.documents.documents.file.TypedFileReference;
+import org.documents.documents.helper.DownloadHelper;
 import org.documents.documents.helper.EventHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.RenditionMapper;
@@ -14,6 +16,7 @@ import org.documents.documents.service.RenditionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,6 +30,7 @@ public class RenditionServiceImpl implements RenditionService {
     private final ContentRepository contentRepository;
     private final CustomRenditionRepository customRenditionRepository;
     private final DocumentRepository documentRepository;
+    private final DownloadHelper downloadHelper;
     private final EventHelper eventHelper;
     private final RenditionHelper renditionHelper;
     private final RenditionMapper renditionMapper;
@@ -63,6 +67,12 @@ public class RenditionServiceImpl implements RenditionService {
     public Mono<Rendition> get(UUID renditionUuid) {
         return renditionRepository.findByUuid(renditionUuid.toString())
                 .map(renditionMapper::map);
+    }
+
+    @Override
+    public Mono<Void> download(ServerHttpResponse response, UUID uuid) {
+        return renditionRepository.findByUuid(uuid.toString())
+                .flatMap(renditionEntity -> downloadHelper.download(response, renditionEntity.getUuid(), new TypedFileReference(renditionEntity)));
     }
 
     @Override

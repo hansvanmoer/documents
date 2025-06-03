@@ -10,6 +10,8 @@ import java.nio.file.Path;
 
 public interface FileHelper {
 
+    String createFileName(String fileName, String mimeType);
+
     Mono<String> readToString(FileContent file, Charset charset);
 
     Flux<DataBuffer> readFromPath(Path path);

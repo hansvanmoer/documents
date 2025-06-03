@@ -11,6 +11,7 @@ import org.documents.documents.service.RenditionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -100,6 +101,20 @@ public class RenditionController {
             UUID renditionUuid
     ) {
         return renditionService.delete(renditionUuid);
+    }
+
+    @Operation(
+            description = "Downloads the rendition",
+            summary = "Downloads the rendition by its UUID"
+    )
+    @GetMapping(ApiConstants.RENDITION_BY_UUID_DOWNLOAD_PATH)
+    public Mono<Void> download(
+            @Parameter(description = "The rendition UUID")
+            @PathVariable(ApiConstants.RENDITION_UUID_PATH_VARIABLE)
+            UUID documentUuid,
+            ServerHttpResponse response
+    ) {
+        return renditionService.download(response, documentUuid);
     }
 
 }

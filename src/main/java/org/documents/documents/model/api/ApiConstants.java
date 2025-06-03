@@ -38,7 +38,13 @@ public interface ApiConstants {
     /**
      * The content by UUID path
      */
-    String CONTENT_BY_UUID_PATH = API_BASE_PATH + "/content-by-uuid/{content-uuid}";
+    String CONTENT_BY_UUID_PATH = API_BASE_PATH + "/content-by-uuid/{" + CONTENT_UUID_PATH_VARIABLE + "}";
+
+    /**
+     * The download content by UUID path
+     */
+    String CONTENT_BY_UUID_DOWNLOAD_PATH = API_BASE_PATH + "/content-by-uuid/{" + CONTENT_UUID_PATH_VARIABLE + "}/download";
+
 
     /**
      * Documents path
@@ -56,6 +62,11 @@ public interface ApiConstants {
     String DOCUMENT_BY_UUID_RENDITIONS_PATH = DOCUMENT_BY_UUID_PATH + "/renditions";
 
     /**
+     * The download by document UUID
+     */
+    String DOCUMENT_BY_UUID_DOWNLOAD_PATH = DOCUMENT_BY_UUID_PATH + "/download";
+
+    /**
      * Search document path
      */
     String SEARCH_DOCUMENTS_PATH = API_BASE_PATH + "/documents/search";
@@ -69,4 +80,10 @@ public interface ApiConstants {
      * Rendition by UUID path
      */
     String RENDITION_BY_UUID_PATH = API_BASE_PATH + "/rendition-by-uuid/{" + RENDITION_UUID_PATH_VARIABLE + "}";
+
+    /**
+     * The download rendition by UUID path
+     */
+    String RENDITION_BY_UUID_DOWNLOAD_PATH = API_BASE_PATH + "/rendition-by-uuid/{" + RENDITION_UUID_PATH_VARIABLE + "}/download";
+
 }

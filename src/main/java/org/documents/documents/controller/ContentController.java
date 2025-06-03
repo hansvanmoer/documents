@@ -11,6 +11,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -69,11 +70,25 @@ public class ContentController {
             summary = "Gets a single piece of content by its UUID"
     )
     @GetMapping(ApiConstants.CONTENT_BY_UUID_PATH)
-    public Mono<Content> getByUuid(
+    public Mono<Content> get(
             @Parameter(description = "The document UUID")
             @PathVariable(ApiConstants.CONTENT_UUID_PATH_VARIABLE)
             UUID contentUuid
     ) {
         return contentService.get(contentUuid);
+    }
+
+    @Operation(
+            description = "Downloads the content",
+            summary = "Downloads the content by its UUID"
+    )
+    @GetMapping(ApiConstants.CONTENT_BY_UUID_DOWNLOAD_PATH)
+    public Mono<Void> download(
+            @Parameter(description = "The content UUID")
+            @PathVariable(ApiConstants.CONTENT_UUID_PATH_VARIABLE)
+            UUID documentUuid,
+            ServerHttpResponse response
+    ) {
+        return contentService.download(response, documentUuid);
     }
 }

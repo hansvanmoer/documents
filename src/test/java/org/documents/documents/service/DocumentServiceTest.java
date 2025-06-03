@@ -6,10 +6,7 @@ import org.documents.documents.db.entity.DocumentEntity;
 import org.documents.documents.db.repository.ContentRepository;
 import org.documents.documents.db.repository.CustomDocumentRepository;
 import org.documents.documents.db.repository.DocumentRepository;
-import org.documents.documents.helper.IndexHelper;
-import org.documents.documents.helper.RenditionHelper;
-import org.documents.documents.helper.TemporalHelper;
-import org.documents.documents.helper.UuidHelper;
+import org.documents.documents.helper.*;
 import org.documents.documents.mapper.DocumentMapper;
 import org.documents.documents.model.DocumentAndContentEntities;
 import org.documents.documents.model.api.Document;
@@ -44,7 +41,10 @@ public class DocumentServiceTest {
                 DocumentMapper documentMapper,
                 DocumentRepository documentRepository,
                 DocumentSearchRepository documentSearchRepository,
+                DownloadHelper downloadHelper,
+                EventHelper eventHelper,
                 IndexHelper indexHelper,
+                RenditionHelper renditionHelper,
                 TemporalHelper temporalHelper,
                 UuidHelper uuidHelper
         ) {
@@ -54,7 +54,10 @@ public class DocumentServiceTest {
                     documentMapper,
                     documentRepository,
                     documentSearchRepository,
+                    downloadHelper,
+                    eventHelper,
                     indexHelper,
+                    renditionHelper,
                     temporalHelper,
                     uuidHelper
             );
@@ -72,7 +75,13 @@ public class DocumentServiceTest {
     @MockitoBean
     private DocumentSearchRepository documentSearchRepository;
     @MockitoBean
+    private DownloadHelper downloadHelper;
+    @MockitoBean
+    private EventHelper eventHelper;
+    @MockitoBean
     private IndexHelper indexHelper;
+    @MockitoBean
+    private RenditionHelper renditionHelper;
     @MockitoBean
     private TemporalHelper temporalHelper;
     @MockitoBean
