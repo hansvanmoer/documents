@@ -11,6 +11,7 @@ import org.documents.documents.helper.TemporalHelper;
 import org.documents.documents.mapper.ContentMapper;
 import org.documents.documents.model.api.Content;
 import org.documents.documents.db.repository.ContentRepository;
+import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.service.ContentService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -66,7 +67,8 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public Mono<Content> get(UUID uuid) {
-        return contentRepository.findByUuid(uuid.toString()).map(contentMapper::map);
+        return contentRepository.findByUuid(uuid.toString()).map(contentMapper::map)
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Content.class, uuid)));
     }
 
     @Override
@@ -81,6 +83,7 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public Mono<Void> download(ServerHttpResponse response, UUID uuid) {
         return contentRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Content.class, uuid)))
                 .flatMap(contentEntity -> downloadHelper.download(response, contentEntity.getUuid(), new TypedFileReference(contentEntity)));
     }
 

@@ -12,6 +12,7 @@ import org.documents.documents.helper.EventHelper;
 import org.documents.documents.helper.RenditionHelper;
 import org.documents.documents.mapper.RenditionMapper;
 import org.documents.documents.model.api.Rendition;
+import org.documents.documents.model.exception.NotFoundException;
 import org.documents.documents.service.RenditionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -66,18 +67,23 @@ public class RenditionServiceImpl implements RenditionService {
     @Override
     public Mono<Rendition> get(UUID renditionUuid) {
         return renditionRepository.findByUuid(renditionUuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Rendition.class, renditionUuid)))
                 .map(renditionMapper::map);
     }
 
     @Override
     public Mono<Void> download(ServerHttpResponse response, UUID uuid) {
         return renditionRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Rendition.class, uuid)))
                 .flatMap(renditionEntity -> downloadHelper.download(response, renditionEntity.getUuid(), new TypedFileReference(renditionEntity)));
     }
 
     @Override
-    public Mono<Void> delete(UUID rendtionUuid) {
-        return renditionRepository.deleteByUuid(rendtionUuid.toString()).then(eventHelper.notifyRenditionDeleted(rendtionUuid));
+    public Mono<Void> delete(UUID uuid) {
+        return renditionRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Rendition.class, uuid)))
+                .flatMap(renditionRepository::delete)
+                .then(eventHelper.notifyRenditionDeleted(uuid));
     }
 
     @Override

@@ -73,9 +73,9 @@ public class DocumentController {
     public Mono<Document> get(
             @Parameter(description = "The document UUID")
             @PathVariable(ApiConstants.DOCUMENT_UUID_PATH_VARIABLE)
-            UUID documentUuid
+            UUID uuid
     ) {
-        return documentService.get(documentUuid);
+        return documentService.get(uuid);
     }
 
     @Operation(
@@ -86,7 +86,7 @@ public class DocumentController {
     public Mono<Document> update(
             @Parameter(description = "The document UUID")
             @PathVariable(ApiConstants.DOCUMENT_UUID_PATH_VARIABLE)
-            UUID documentUuid,
+            UUID uuid,
             @RequestBody
             UpdateDocumentRequest updateDocumentRequest
 
@@ -98,7 +98,7 @@ public class DocumentController {
         if(updateDocumentRequest.contentUuid() != null) {
             builder.contentUuid(updateDocumentRequest.contentUuid());
         }
-        return documentService.update(documentUuid, builder.build());
+        return documentService.update(uuid, builder.build());
     }
 
     @Operation(

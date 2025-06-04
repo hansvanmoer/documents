@@ -56,7 +56,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Mono<Document> get(UUID uuid) {
-        return customDocumentRepository.findByUuid(uuid).map(documentMapper::map);
+        return customDocumentRepository.findByUuid(uuid).map(documentMapper::map)
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Document.class, uuid)));
     }
 
     @Override
@@ -77,6 +78,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Mono<Document> update(UUID uuid, DocumentUpdate update) {
         return documentRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Document.class, uuid)))
                 .flatMap(documentEntity ->
                         Mono.justOrEmpty(update.getContentUuid().toString())
                                 .flatMap(contentRepository::findByUuid)
@@ -107,7 +109,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Mono<Void> delete(UUID uuid) {
-        return documentRepository.findByUuid(uuid.toString()).flatMap(entity ->
+        return documentRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Document.class, uuid)))
+                .flatMap(entity ->
             documentRepository.delete(entity).then(documentSearchRepository.deleteById(entity.getId()))
         ).then(eventHelper.notifyDocumentDeleted(uuid));
     }
@@ -115,6 +119,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Mono<Void> download(ServerHttpResponse response, UUID uuid) {
         return documentRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Document.class, uuid)))
                 .flatMap(documentEntity ->
                     contentRepository
                             .findById(documentEntity.getContentId())
@@ -127,6 +132,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Mono<Void> download(ServerHttpResponse response, UUID uuid, MediaType mimeType) {
         return documentRepository.findByUuid(uuid.toString())
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(Document.class, uuid)))
                 .flatMap(documentEntity ->
                         contentRepository
                                 .findById(documentEntity.getContentId())
